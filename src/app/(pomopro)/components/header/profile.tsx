@@ -16,8 +16,8 @@ export function Profile() {
   const router = useRouter();
   const handleLogout = () => {
     router.push("/auth/login");
-    // Implementar a lógica de logout
   };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -42,7 +42,11 @@ export function Profile() {
           <Settings className="mr-2 h-4 w-4" />
           <span>Configurações</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleLogout}>
+        <DropdownMenuItem
+          onSelect={(e) => e.preventDefault()}
+          className="flex cursor-pointer gap-2 items-center"
+          onClick={handleLogout}
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>
         </DropdownMenuItem>

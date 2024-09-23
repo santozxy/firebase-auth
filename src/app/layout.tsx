@@ -15,7 +15,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "PomoPro",
+  title: { template: "%s | PomoPro", default: "PomoPro" },
   description:
     "O PomoPro é uma aplicação de produtividade baseado na técnica Pomodoro.",
 };
