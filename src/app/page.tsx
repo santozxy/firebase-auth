@@ -23,7 +23,7 @@ export default function Home() {
           <h2 className="text-3xl font-semibold mb-6">
             Aumente seu foco e produtividade
           </h2>
-          <p className="text-muted-foreground mb-6">
+          <p className="text-muted-foreground mb-6 text-lg">
             PomoPro é a ferramenta perfeita para quem busca melhorar sua gestão
             de tempo e aumentar a produtividade. Com nossa aplicação intuitiva,
             você pode facilmente implementar a técnica Pomodoro em sua rotina
