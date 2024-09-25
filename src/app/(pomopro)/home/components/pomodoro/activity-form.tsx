@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlusCircle } from "lucide-react";
 import { Activity } from "@/domain/history/types";
+import { toast } from "@/hooks/use-toast";
 
 interface ActivityFormProps {
   onAddActivity: (activity: Activity) => void;
@@ -18,12 +19,20 @@ export function ActivityForm({ onAddActivity, disabled }: ActivityFormProps) {
   const addActivity = () => {
     if (disabled) return;
     if (!newActivityName.trim()) {
-      // You might want to add a toast notification here
+      toast({
+        title: "Preencha o nome da atividade",
+        variant: "destructive",
+        description: "O nome da atividade não pode ser vazio.",
+      });
       return;
     }
     const duration = parseInt(newActivityDuration);
     if (isNaN(duration) || duration <= 0) {
-      // You might want to add a toast notification here
+      toast({
+        title: "Preencha a duração da atividade",
+        variant: "destructive",
+        description: "A duração da atividade deve ser um número positivo.",
+      });
       return;
     }
     const newActivity: Activity = {
@@ -53,6 +62,7 @@ export function ActivityForm({ onAddActivity, disabled }: ActivityFormProps) {
             <Label htmlFor="name">Nome da Atividade</Label>
             <Input
               id="name"
+              placeholder="Ex: Estudar React"
               value={newActivityName}
               onChange={(e) => setNewActivityName(e.target.value)}
               disabled={disabled}
@@ -61,6 +71,7 @@ export function ActivityForm({ onAddActivity, disabled }: ActivityFormProps) {
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="duration">Duração (minutos)</Label>
             <Input
+              placeholder="Ex: 25"
               id="duration"
               type="number"
               value={newActivityDuration}
