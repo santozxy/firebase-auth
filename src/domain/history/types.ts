@@ -1,12 +1,9 @@
-export type ActivityType = "Trabalho" | "Estudo" | "Exercício" | "Outro";
-export type ActivityStatus = "Concluído" | "Cancelado";
 
 export interface Activity {
   name: string;
-  type: ActivityType;
   duration: number;
+  status: "Pendente" | "Em andamento" | "Completa" | "Cancelada";
   timeWorked: number;
-  status: ActivityStatus;
-  reason: string;
-  completedAt: Date;
+  startDate: string | null;
+  endDate: string | null;
 }
