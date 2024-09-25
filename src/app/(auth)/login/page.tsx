@@ -24,7 +24,7 @@ export default function Login() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push("/pomopro");
+    router.push("/home");
     console.log("Tentativa de login", { email, password, rememberMe });
   };
 
