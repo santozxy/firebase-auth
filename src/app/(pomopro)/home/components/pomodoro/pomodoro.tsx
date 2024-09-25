@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-
 import { ActivityForm } from "./activity-form";
 import { Timer } from "./timer";
 import { Settings } from "./settings";
 import { History } from "./history";
 import { Activity } from "@/domain/history/types";
+import { Button } from "@/components/ui/button";
+import { Bell, BellOff } from "lucide-react";
 
 export function Pomodoro() {
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -16,15 +17,14 @@ export function Pomodoro() {
   const [isRunning, setIsRunning] = useState(false);
   const [breakTime, setBreakTime] = useState(5); // 5 minutes default
   const [timerActive, setTimerActive] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   const updateActivities = useCallback((newActivities: Activity[]) => {
-    // Função de callback para atualizar a lista de atividades no estado e no localStorage
     setActivities(newActivities);
     localStorage.setItem("activities", JSON.stringify(newActivities));
   }, []);
 
   const addActivity = (newActivity: Activity) => {
-    // Função de callback para adicionar uma nova atividade à lista de atividades
     updateActivities([...activities, newActivity]);
     if (!currentActivity && !timerActive) {
       startActivity(newActivity);
@@ -32,7 +32,6 @@ export function Pomodoro() {
   };
 
   const startActivity = (activity: Activity) => {
-    // Função de callback para iniciar a atividade selecionada pelo usuário
     const now = new Date();
     setCurrentActivity({
       ...activity,
@@ -46,7 +45,6 @@ export function Pomodoro() {
   };
 
   const moveToNextActivity = useCallback(() => {
-    // Função de callback para mover para a próxima atividade após a atual ser finalizada
     const nextActivity = activities.find((a) => a.status === "Pendente");
     if (nextActivity) {
       startActivity(nextActivity);
@@ -58,7 +56,6 @@ export function Pomodoro() {
   }, [activities]);
 
   const startBreak = useCallback(() => {
-    // Função de callback para iniciar o intervalo entre atividades de trabalho
     setIsWorking(false);
     setTimeLeft(breakTime * 60);
     setIsRunning(true);
@@ -66,7 +63,6 @@ export function Pomodoro() {
   }, [breakTime]);
 
   const finishCurrentActivity = useCallback(() => {
-    // Função de callback para finalizar a atividade atual e iniciar o intervalo
     if (currentActivity) {
       const now = new Date();
       const updatedActivities = activities.map((a) =>
@@ -81,11 +77,22 @@ export function Pomodoro() {
       updateActivities(updatedActivities);
       setCurrentActivity(null);
       startBreak();
+      if (notificationsEnabled) {
+        showNotification(
+          "Atividade concluída!",
+          `${currentActivity.name} foi finalizada.`
+        );
+      }
     }
-  }, [activities, currentActivity, updateActivities, startBreak]);
+  }, [
+    activities,
+    currentActivity,
+    updateActivities,
+    startBreak,
+    notificationsEnabled,
+  ]);
 
   const cancelActivity = () => {
-    // Função de callback para cancelar a atividade atual e iniciar o intervalo de descanso
     if (currentActivity) {
       const now = new Date();
       const updatedActivities = activities.map((a) =>
@@ -104,7 +111,6 @@ export function Pomodoro() {
   };
 
   const skipBreak = () => {
-    // Função de callback para pular o intervalo de descanso e iniciar a próxima atividade
     if (!isWorking) {
       setIsWorking(true);
       moveToNextActivity();
@@ -113,10 +119,26 @@ export function Pomodoro() {
   };
 
   const toggleTimer = () => {
-    // Função de callback para pausar ou retomar o cronômetro
     setIsRunning(!isRunning);
     if (!timerActive) {
       setTimerActive(true);
+    }
+  };
+
+  const toggleNotifications = async () => {
+    if (!notificationsEnabled) {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        setNotificationsEnabled(true);
+      }
+    } else {
+      setNotificationsEnabled(false);
+    }
+  };
+
+  const showNotification = (title: string, body: string) => {
+    if (Notification.permission === "granted") {
+      new Notification(title, { body });
     }
   };
 
@@ -128,13 +150,11 @@ export function Pomodoro() {
   }, []);
 
   useEffect(() => {
-    // Efeito colateral para controlar o tempo restante e atualizar o tempo trabalhado na atividade atual
     let interval: NodeJS.Timeout | null = null;
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
         setTimeLeft((time) => time - 1);
         if (currentActivity) {
-          // Atualiza o tempo trabalhado na atividade atual a cada segundo
           setCurrentActivity((activity: Activity | null) =>
             activity
               ? { ...activity, timeWorked: activity.timeWorked + 1 }
@@ -143,12 +163,17 @@ export function Pomodoro() {
         }
       }, 1000);
     } else if (timeLeft === 0) {
-      // Finaliza a atividade atual e inicia o intervalo de descanso após o término do tempo
       if (isWorking) {
         finishCurrentActivity();
       } else {
         setIsWorking(true);
         moveToNextActivity();
+        if (notificationsEnabled) {
+          showNotification(
+            "Intervalo finalizado!",
+            "Hora de voltar ao trabalho!"
+          );
+        }
       }
     }
     return () => {
@@ -161,11 +186,31 @@ export function Pomodoro() {
     currentActivity,
     finishCurrentActivity,
     moveToNextActivity,
+    notificationsEnabled,
   ]);
 
   return (
     <div className="p-4 w-full grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-4">
       <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">PomoPro</h1>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleNotifications}
+            title={
+              notificationsEnabled
+                ? "Desativar notificações"
+                : "Ativar notificações"
+            }
+          >
+            {notificationsEnabled ? (
+              <Bell className="h-4 w-4" />
+            ) : (
+              <BellOff className="h-4 w-4 animate-pulse duration-700" />
+            )}
+          </Button>
+        </div>
         <ActivityForm onAddActivity={addActivity} disabled={timerActive} />
         <Timer
           currentActivity={currentActivity}
