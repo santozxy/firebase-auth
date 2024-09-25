@@ -1,37 +1,73 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { History as HistoryIcon, Calendar } from "lucide-react";
 import { Activity } from "@/domain/history/types";
-import { formatTime } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { getStatusColor, getStatusIcon, timeInMinutes } from "./helpers";
 
-interface HistorySidebarProps {
-  history: Activity[];
+interface HistoryProps {
+  activities: Activity[];
 }
 
-export function HistorySidebar({ history }: HistorySidebarProps) {
+export function History({ activities }: HistoryProps) {
   return (
-    <Card className="w-full">
-      <CardContent className="h-[49rem] p-4">
-        <h1 className="text-lg font-semibold">Histórico</h1>
-        <ScrollArea className="h-[42rem]">
-          {history.map((activity, index) => (
-            <Card key={index} className="bg-secondary">
-              <CardContent className="p-4">
-                <p className="font-semibold">{activity.name}</p>
-                <p className="text-sm text-muted-foreground">{activity.type}</p>
-                <p className="text-sm">Duração: {activity.duration} min</p>
-                <p className="text-sm">
-                  Trabalhado: {formatTime(activity.timeWorked)}
-                </p>
-                <p className="text-sm">Status: {activity.status}</p>
-                {activity.reason && (
-                  <p className="text-sm">Motivo: {activity.reason}</p>
-                )}
-                <p className="text-xs text-muted-foreground mt-1">
-                  {new Date(activity.completedAt).toLocaleString()}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <HistoryIcon className="mr-2" />
+          Histórico de Atividades
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-[40rem] pr-4">
+          {activities.length === 0 ? (
+            <p>Nenhuma atividade registrada.</p>
+          ) : (
+            <ul className="space-y-4">
+              {activities.map((activity, index) => (
+                <li key={index} className="border-b pb-6 last:border-b-0">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-semibold">{activity.name}</h3>
+                    <Badge
+                      variant="outline"
+                      className={getStatusColor(activity.status)}
+                    >
+                      {getStatusIcon(activity.status)}
+                      <span className="ml-1">{activity.status}</span>
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-500">
+                    {activity.startDate && (
+                      <div className="flex items-center text-sm text-gray-500 mt-2">
+                        <Calendar className="mr-1 h-4 w-4" />
+                        <span>
+                          Início:{" "}
+                          {new Date(activity.startDate).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    {activity.endDate && (
+                      <div className="flex items-center text-sm text-gray-500 mt-1">
+                        <Calendar className="mr-1 h-4 w-4" />
+                        <span>
+                          Fim: {new Date(activity.endDate).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>
+                      Duração: {timeInMinutes(activity.duration)} minutos
+                    </span>
+                    <span>
+                      Tempo trabalhado: {timeInMinutes(activity.timeWorked)}{" "}
+                      minutos
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </ScrollArea>
       </CardContent>
     </Card>
