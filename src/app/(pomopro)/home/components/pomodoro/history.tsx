@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { History as HistoryIcon, Calendar } from "lucide-react";
+import { History as HistoryIcon } from "lucide-react";
 import { Activity } from "@/domain/history/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getStatusColor, getStatusIcon, timeInMinutes } from "./helpers";
@@ -39,7 +39,6 @@ export function History({ activities }: HistoryProps) {
                   <div className="flex justify-between text-sm text-gray-500">
                     {activity.startDate && (
                       <div className="flex items-center text-sm text-gray-500 mt-2">
-                        <Calendar className="mr-1 h-4 w-4" />
                         <span>
                           Início:{" "}
                           {new Date(activity.startDate).toLocaleString()}
@@ -48,7 +47,6 @@ export function History({ activities }: HistoryProps) {
                     )}
                     {activity.endDate && (
                       <div className="flex items-center text-sm text-gray-500 mt-1">
-                        <Calendar className="mr-1 h-4 w-4" />
                         <span>
                           Fim: {new Date(activity.endDate).toLocaleString()}
                         </span>

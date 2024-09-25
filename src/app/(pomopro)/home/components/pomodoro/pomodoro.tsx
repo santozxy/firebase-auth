@@ -18,11 +18,13 @@ export function Pomodoro() {
   const [timerActive, setTimerActive] = useState(false);
 
   const updateActivities = useCallback((newActivities: Activity[]) => {
+    // Função de callback para atualizar a lista de atividades no estado e no localStorage
     setActivities(newActivities);
     localStorage.setItem("activities", JSON.stringify(newActivities));
   }, []);
 
   const addActivity = (newActivity: Activity) => {
+    // Função de callback para adicionar uma nova atividade à lista de atividades
     updateActivities([...activities, newActivity]);
     if (!currentActivity && !timerActive) {
       startActivity(newActivity);
@@ -30,6 +32,7 @@ export function Pomodoro() {
   };
 
   const startActivity = (activity: Activity) => {
+    // Função de callback para iniciar a atividade selecionada pelo usuário
     const now = new Date();
     setCurrentActivity({
       ...activity,
@@ -43,6 +46,7 @@ export function Pomodoro() {
   };
 
   const moveToNextActivity = useCallback(() => {
+    // Função de callback para mover para a próxima atividade após a atual ser finalizada
     const nextActivity = activities.find((a) => a.status === "Pendente");
     if (nextActivity) {
       startActivity(nextActivity);
@@ -54,6 +58,7 @@ export function Pomodoro() {
   }, [activities]);
 
   const startBreak = useCallback(() => {
+    // Função de callback para iniciar o intervalo entre atividades de trabalho
     setIsWorking(false);
     setTimeLeft(breakTime * 60);
     setIsRunning(true);
@@ -61,6 +66,7 @@ export function Pomodoro() {
   }, [breakTime]);
 
   const finishCurrentActivity = useCallback(() => {
+    // Função de callback para finalizar a atividade atual e iniciar o intervalo
     if (currentActivity) {
       const now = new Date();
       const updatedActivities = activities.map((a) =>
@@ -79,6 +85,7 @@ export function Pomodoro() {
   }, [activities, currentActivity, updateActivities, startBreak]);
 
   const cancelActivity = () => {
+    // Função de callback para cancelar a atividade atual e iniciar o intervalo de descanso
     if (currentActivity) {
       const now = new Date();
       const updatedActivities = activities.map((a) =>
@@ -97,6 +104,7 @@ export function Pomodoro() {
   };
 
   const skipBreak = () => {
+    // Função de callback para pular o intervalo de descanso e iniciar a próxima atividade
     if (!isWorking) {
       setIsWorking(true);
       moveToNextActivity();
@@ -105,6 +113,7 @@ export function Pomodoro() {
   };
 
   const toggleTimer = () => {
+    // Função de callback para pausar ou retomar o cronômetro
     setIsRunning(!isRunning);
     if (!timerActive) {
       setTimerActive(true);
@@ -119,11 +128,13 @@ export function Pomodoro() {
   }, []);
 
   useEffect(() => {
+    // Efeito colateral para controlar o tempo restante e atualizar o tempo trabalhado na atividade atual
     let interval: NodeJS.Timeout | null = null;
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
         setTimeLeft((time) => time - 1);
         if (currentActivity) {
+          // Atualiza o tempo trabalhado na atividade atual a cada segundo
           setCurrentActivity((activity: Activity | null) =>
             activity
               ? { ...activity, timeWorked: activity.timeWorked + 1 }
@@ -132,6 +143,7 @@ export function Pomodoro() {
         }
       }, 1000);
     } else if (timeLeft === 0) {
+      // Finaliza a atividade atual e inicia o intervalo de descanso após o término do tempo
       if (isWorking) {
         finishCurrentActivity();
       } else {

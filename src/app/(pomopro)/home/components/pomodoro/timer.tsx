@@ -31,12 +31,12 @@ export function Timer({
       <CardHeader>
         <CardTitle className="flex items-center">
           <Clock className="mr-2" />
-          Timer
+          Tempo
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="text-center">
-          <h2 className="text-6xl font-bold mb-4" aria-live="polite">
+          <h2 className="text-7xl font-sembold mb-4" aria-live="polite">
             {formatTime(timeLeft)}
           </h2>
           <p className="text-xl mb-4">
