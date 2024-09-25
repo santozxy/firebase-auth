@@ -8,7 +8,7 @@ export default function LayoutPomoPro({
   return (
     <div>
       <Header />
-      <main>{children}</main>
+      <main className="p-6">{children}</main>
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { PomodoroTimer } from "@/components/timer";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <header className="pt-8 pb-6 px-4 text-center">
         <div className="flex justify-center items-center mb-4">
           <Clock className="h-12 w-12 text-primary mr-2" />
