@@ -1,7 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Pause, Play, CheckCircle, XCircle, SkipForward } from "lucide-react";
+import {
+  Clock,
+  Pause,
+  Play,
+  CheckCircle,
+  XCircle,
+  SkipForward,
+} from "lucide-react";
 import { formatTime } from "./helpers";
 import { Activity } from "@/domain/history/types";
 
@@ -46,17 +53,11 @@ export function Timer({
                 : "Nenhuma atividade em andamento"
               : "Tempo de descanso"}
           </p>
-          <Badge
-            variant={isWorking ? "default" : "secondary"}
-            className="mb-4"
-          >
+          <Badge variant={isWorking ? "default" : "secondary"} className="mb-4">
             {isWorking ? "Trabalhando" : "Descansando"}
           </Badge>
           <div className="space-x-2">
-            <Button
-              onClick={onToggleTimer}
-              disabled={!timeLeft}
-            >
+            <Button onClick={onToggleTimer} disabled={!timeLeft}>
               {isRunning ? (
                 <Pause className="mr-2 h-4 w-4" />
               ) : (
@@ -66,16 +67,10 @@ export function Timer({
             </Button>
             {isWorking ? (
               <>
-                <Button
-                  onClick={onFinishActivity}
-                  disabled={!currentActivity}
-                >
+                <Button onClick={onFinishActivity} disabled={!currentActivity}>
                   <CheckCircle className="mr-2 h-4 w-4" /> Finalizar
                 </Button>
-                <Button
-                  onClick={onCancelActivity}
-                  disabled={!currentActivity}
-                >
+                <Button onClick={onCancelActivity} disabled={!currentActivity}>
                   <XCircle className="mr-2 h-4 w-4" /> Cancelar
                 </Button>
               </>
