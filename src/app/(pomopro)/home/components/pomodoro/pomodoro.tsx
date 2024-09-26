@@ -213,7 +213,7 @@ export function Pomodoro() {
     if (Notification.permission === "granted") {
       new Notification(title, { body });
     }
-    if (Notification.permission !== "denied") {
+    if (Notification.permission === "denied") {
       toast({ title, description: body });
     }
   };
