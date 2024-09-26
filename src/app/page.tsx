@@ -52,9 +52,11 @@ export default function Home() {
               Foco
             </Badge>
           </div>
-          <Button size="lg" className="w-full md:w-auto">
-            <Link href="/login">Começar agora</Link>
-          </Button>
+          <Link href="/login">
+            <Button size="lg" className="w-full md:w-auto">
+              Começar agora
+            </Button>
+          </Link>
         </div>
 
         <div className="flex-shrink-0">
