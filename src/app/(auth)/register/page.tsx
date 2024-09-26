@@ -26,6 +26,22 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password || !confirmPassword) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (password.length < 6) {
+      toast({
+        title: "Erro",
+        description: "A senha deve ter no mínimo 6 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (password !== confirmPassword) {
       toast({
         title: "Erro",
@@ -63,7 +79,7 @@ export default function Register() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-2">

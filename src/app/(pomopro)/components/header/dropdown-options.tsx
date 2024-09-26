@@ -39,7 +39,6 @@ export function DropdownOptions() {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Configurações</DropdownMenuLabel>
         <DropdownMenuSeparator />
-
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <Sun className="mr-2 h-4 w-4" />
