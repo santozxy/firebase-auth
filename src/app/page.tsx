@@ -1,16 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Clock, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { PomodoroTimer } from "@/components/timer";
+import logo from "./icon.png";
+import Image from "next/image";
 
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="pt-8 pb-6 px-4 text-center">
-        <div className="flex justify-center items-center mb-4">
-          <Clock className="h-12 w-12 text-primary mr-2" />
+        <div className="flex justify-center items-center gap-3 mb-4">
+          <Image src={logo} alt="PomoPro" width={40} height={40} />
           <h1 className="text-4xl font-bold text-primary">PomoPro</h1>
         </div>
         <p className="text-xl text-muted-foreground">
