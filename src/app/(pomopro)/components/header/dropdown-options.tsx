@@ -53,6 +53,7 @@ export function DropdownOptions() {
       }
     }
   };
+  const limitedName = user?.displayName?.split(" ")[0] || "Usuário";
 
   if (loading) return <Skeleton className="w-10 h-10 rounded-full" />;
 
@@ -77,7 +78,7 @@ export function DropdownOptions() {
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-2 p-1">
             <p className="text-sm font-medium leading-none">
-              {`Olá ${user?.displayName} 👋` || "Olá Usuário 👋"}
+              {`Olá ${limitedName} 👋`}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
               {user?.email || "usuario@exemplo.com"}

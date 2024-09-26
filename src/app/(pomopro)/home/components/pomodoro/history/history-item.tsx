@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trash2, Clock, Calendar, Tag } from "lucide-react"
-import { getStatusColor, getStatusIcon, timeInMinutes } from "../helpers"
+import { formatDate, getStatusColor, getStatusIcon, timeInMinutes } from "../helpers"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,16 +23,6 @@ interface ActivityItemProps {
 }
 
 export function HistoryItem({ activity, onDelete }: ActivityItemProps) {
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
   return (
     <Card className="mb-4">
       <CardHeader className="pb-2">
