@@ -1,6 +1,6 @@
 import { Header } from "./components/header/header";
 
-export default function LayoutPomoPro({
+export default async function LayoutPomoPro({
   children,
 }: {
   children: React.ReactNode;
