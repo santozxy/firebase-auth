@@ -18,6 +18,7 @@ import {
   DocumentReference,
 } from "firebase/firestore";
 import { useAuth } from "@/hooks/use-auth";
+import { toast } from "@/hooks/use-toast";
 
 export function Pomodoro() {
   const auth = useAuth().user;
@@ -28,8 +29,6 @@ export function Pomodoro() {
   const [isRunning, setIsRunning] = useState(false);
   const [breakTime, setBreakTime] = useState(5); // 5 minutes default
   const [timerActive, setTimerActive] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [showNotificationModal, setShowNotificationModal] = useState(false);
   const activitiesCollection: CollectionReference | null = auth?.uid
     ? collection(db, "users", auth.uid, "activities")
     : null;
@@ -79,7 +78,13 @@ export function Pomodoro() {
       }
 
       // Save state to localStorage
-      saveStateToLocalStorage(updatedActivity, activity.duration, true, true, true);
+      saveStateToLocalStorage(
+        updatedActivity,
+        activity.duration,
+        true,
+        true,
+        true
+      );
     },
     [activitiesCollection]
   );
@@ -120,12 +125,10 @@ export function Pomodoro() {
       updateActivities(updatedActivities);
       setCurrentActivity(null);
       startBreak();
-      if (notificationsEnabled) {
-        showNotification(
-          "Atividade concluída!",
-          `${currentActivity.name} foi finalizada.`
-        );
-      }
+      showNotification(
+        "Atividade concluída!",
+        `${currentActivity.name} foi finalizada.`
+      );
 
       if (activitiesCollection && currentActivity.id) {
         const activityRef: DocumentReference = doc(
@@ -147,7 +150,6 @@ export function Pomodoro() {
     currentActivity,
     updateActivities,
     startBreak,
-    notificationsEnabled,
     activitiesCollection,
   ]);
 
@@ -188,7 +190,6 @@ export function Pomodoro() {
       setIsWorking(true);
       moveToNextActivity();
       setTimeLeft(0);
-      showNotification("Intervalo pulado", "Voltando ao trabalho.");
     }
   };
 
@@ -199,12 +200,21 @@ export function Pomodoro() {
       setTimerActive(true);
     }
     // Save state to localStorage
-    saveStateToLocalStorage(currentActivity, timeLeft, isWorking, newIsRunning, true);
+    saveStateToLocalStorage(
+      currentActivity,
+      timeLeft,
+      isWorking,
+      newIsRunning,
+      true
+    );
   };
 
   const showNotification = (title: string, body: string) => {
     if (Notification.permission === "granted") {
       new Notification(title, { body });
+    }
+    if (Notification.permission !== "denied") {
+      toast({ title, description: body });
     }
   };
 
@@ -236,7 +246,10 @@ export function Pomodoro() {
     if (storedState) {
       const state = JSON.parse(storedState);
       const timePassed = (new Date().getTime() - state.lastUpdated) / 1000;
-      const updatedTimeLeft = Math.max(0, state.timeLeft - (state.isRunning ? Math.floor(timePassed) : 0));
+      const updatedTimeLeft = Math.max(
+        0,
+        state.timeLeft - (state.isRunning ? Math.floor(timePassed) : 0)
+      );
 
       setCurrentActivity(state.currentActivity);
       setTimeLeft(updatedTimeLeft);
@@ -253,7 +266,13 @@ export function Pomodoro() {
         setTimeLeft((time) => {
           const newTime = time - 1;
           // Save state to localStorage every second
-          saveStateToLocalStorage(currentActivity, newTime, isWorking, isRunning, timerActive);
+          saveStateToLocalStorage(
+            currentActivity,
+            newTime,
+            isWorking,
+            isRunning,
+            timerActive
+          );
           return newTime;
         });
         if (currentActivity) {
@@ -270,12 +289,10 @@ export function Pomodoro() {
       } else {
         setIsWorking(true);
         moveToNextActivity();
-        if (notificationsEnabled) {
-          showNotification(
-            "Intervalo finalizado!",
-            "Hora de voltar ao trabalho!"
-          );
-        }
+        showNotification(
+          "Intervalo finalizado!",
+          "Hora de voltar ao trabalho!"
+        );
       }
     }
     return () => {
@@ -288,7 +305,6 @@ export function Pomodoro() {
     currentActivity,
     finishCurrentActivity,
     moveToNextActivity,
-    notificationsEnabled,
   ]);
 
   return (
