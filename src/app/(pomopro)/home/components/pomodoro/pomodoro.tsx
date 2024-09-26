@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ActivityForm } from "./activity-form";
 import { Timer } from "./timer";
 import { Settings } from "./settings";
@@ -30,6 +30,23 @@ export function Pomodoro() {
   const activitiesCollection: CollectionReference | null = auth?.uid
     ? collection(db, "users", auth.uid, "activities")
     : null;
+
+  const activityCompleteAudioRef = useRef<HTMLAudioElement | null>(null);
+  const breakCompleteAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    activityCompleteAudioRef.current = new Audio("/activity-complete.mp3");
+    breakCompleteAudioRef.current = new Audio("/break-complete.mp3");
+
+    return () => {
+      if (activityCompleteAudioRef.current) {
+        activityCompleteAudioRef.current = null;
+      }
+      if (breakCompleteAudioRef.current) {
+        breakCompleteAudioRef.current = null;
+      }
+    };
+  }, []);
 
   const updateActivities = useCallback((newActivities: Activity[]) => {
     setActivities(newActivities);
@@ -75,7 +92,6 @@ export function Pomodoro() {
         });
       }
 
-      // Save state to localStorage
       saveStateToLocalStorage(
         updatedActivity,
         activity.duration,
@@ -95,7 +111,6 @@ export function Pomodoro() {
       setCurrentActivity(null);
       setIsRunning(false);
       setTimerActive(false);
-      // Save state to localStorage
       saveStateToLocalStorage(null, 0, true, false, false);
     }
   }, [activities, startActivity]);
@@ -105,7 +120,6 @@ export function Pomodoro() {
     setTimeLeft(breakTime * 60);
     setIsRunning(true);
     setTimerActive(true);
-    // Save state to localStorage
     saveStateToLocalStorage(null, breakTime * 60, false, true, true);
   }, [breakTime]);
 
@@ -123,7 +137,8 @@ export function Pomodoro() {
       updateActivities(updatedActivities);
       setCurrentActivity(null);
       startBreak();
-      showNotification(
+      playSound('activity');
+      showNotificationOrToast(
         "Atividade concluída!",
         `${currentActivity.name} foi finalizada.`
       );
@@ -197,7 +212,6 @@ export function Pomodoro() {
     if (!timerActive) {
       setTimerActive(true);
     }
-    // Save state to localStorage
     saveStateToLocalStorage(
       currentActivity,
       timeLeft,
@@ -207,11 +221,18 @@ export function Pomodoro() {
     );
   };
 
-  const showNotification = (title: string, body: string) => {
+  const playSound = (type: 'activity' | 'break') => {
+    if (type === 'activity' && activityCompleteAudioRef.current) {
+      activityCompleteAudioRef.current.play();
+    } else if (type === 'break' && breakCompleteAudioRef.current) {
+      breakCompleteAudioRef.current.play();
+    }
+  };
+
+  const showNotificationOrToast = (title: string, body: string) => {
     if (Notification.permission === "granted") {
       new Notification(title, { body });
-    }
-    if (Notification.permission === "denied") {
+    } else {
       toast({ title, description: body });
     }
   };
@@ -263,7 +284,6 @@ export function Pomodoro() {
       interval = setInterval(() => {
         setTimeLeft((time) => {
           const newTime = time - 1;
-          // Save state to localStorage every second
           saveStateToLocalStorage(
             currentActivity,
             newTime,
@@ -287,7 +307,8 @@ export function Pomodoro() {
       } else {
         setIsWorking(true);
         moveToNextActivity();
-        showNotification(
+        playSound('break');
+        showNotificationOrToast(
           "Intervalo finalizado!",
           "Hora de voltar ao trabalho!"
         );
@@ -299,7 +320,7 @@ export function Pomodoro() {
   }, [isRunning, timeLeft, isWorking, currentActivity, finishCurrentActivity, moveToNextActivity, timerActive]);
 
   return (
-    <div className=" w-full grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-4">
+    <div className="w-full grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-4">
       <div className="space-y-4">
         <ActivityForm onAddActivity={addActivity} disabled={timerActive} />
         <Timer
