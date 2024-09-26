@@ -77,6 +77,9 @@ export function Pomodoro() {
           console.error("Error updating activity status in Firestore:", error);
         });
       }
+
+      // Save state to localStorage
+      saveStateToLocalStorage(updatedActivity, activity.duration, true, true, true);
     },
     [activitiesCollection]
   );
@@ -89,6 +92,8 @@ export function Pomodoro() {
       setCurrentActivity(null);
       setIsRunning(false);
       setTimerActive(false);
+      // Save state to localStorage
+      saveStateToLocalStorage(null, 0, true, false, false);
     }
   }, [activities, startActivity]);
 
@@ -97,6 +102,8 @@ export function Pomodoro() {
     setTimeLeft(breakTime * 60);
     setIsRunning(true);
     setTimerActive(true);
+    // Save state to localStorage
+    saveStateToLocalStorage(null, breakTime * 60, false, true, true);
   }, [breakTime]);
 
   const finishCurrentActivity = useCallback(async () => {
@@ -181,14 +188,18 @@ export function Pomodoro() {
       setIsWorking(true);
       moveToNextActivity();
       setTimeLeft(0);
+      showNotification("Intervalo pulado", "Voltando ao trabalho.");
     }
   };
 
   const toggleTimer = () => {
-    setIsRunning(!isRunning);
+    const newIsRunning = !isRunning;
+    setIsRunning(newIsRunning);
     if (!timerActive) {
       setTimerActive(true);
     }
+    // Save state to localStorage
+    saveStateToLocalStorage(currentActivity, timeLeft, isWorking, newIsRunning, true);
   };
 
   const showNotification = (title: string, body: string) => {
@@ -197,10 +208,41 @@ export function Pomodoro() {
     }
   };
 
+  const saveStateToLocalStorage = (
+    activity: Activity | null,
+    time: number,
+    working: boolean,
+    running: boolean,
+    active: boolean
+  ) => {
+    const state = {
+      currentActivity: activity,
+      timeLeft: time,
+      isWorking: working,
+      isRunning: running,
+      timerActive: active,
+      lastUpdated: new Date().getTime(),
+    };
+    localStorage.setItem("pomodoroState", JSON.stringify(state));
+  };
+
   useEffect(() => {
     const storedActivities = localStorage.getItem("activities");
     if (storedActivities) {
       setActivities(JSON.parse(storedActivities));
+    }
+
+    const storedState = localStorage.getItem("pomodoroState");
+    if (storedState) {
+      const state = JSON.parse(storedState);
+      const timePassed = (new Date().getTime() - state.lastUpdated) / 1000;
+      const updatedTimeLeft = Math.max(0, state.timeLeft - (state.isRunning ? Math.floor(timePassed) : 0));
+
+      setCurrentActivity(state.currentActivity);
+      setTimeLeft(updatedTimeLeft);
+      setIsWorking(state.isWorking);
+      setIsRunning(state.isRunning);
+      setTimerActive(state.timerActive);
     }
   }, []);
 
@@ -208,7 +250,12 @@ export function Pomodoro() {
     let interval: NodeJS.Timeout | null = null;
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
-        setTimeLeft((time) => time - 1);
+        setTimeLeft((time) => {
+          const newTime = time - 1;
+          // Save state to localStorage every second
+          saveStateToLocalStorage(currentActivity, newTime, isWorking, isRunning, timerActive);
+          return newTime;
+        });
         if (currentActivity) {
           setCurrentActivity((activity) =>
             activity
