@@ -4,12 +4,24 @@ import { useState, useEffect, useCallback } from "react";
 import { ActivityForm } from "./activity-form";
 import { Timer } from "./timer";
 import { Settings } from "./settings";
-import { History } from "./history";
+import { History } from "./history/history";
 import { Activity } from "@/domain/history/types";
 import { Button } from "@/components/ui/button";
 import { Bell, BellOff } from "lucide-react";
+import { db } from "@/app/lib/firebase/config";
+import {
+  addDoc,
+  collection,
+  doc,
+  updateDoc,
+  CollectionReference,
+  DocumentReference,
+} from "firebase/firestore";
+import { useAuth } from "@/hooks/use-auth";
+import { NotificationPermission } from "./notification-permission";
 
 export function Pomodoro() {
+  const auth = useAuth().user;
   const [activities, setActivities] = useState<Activity[]>([]);
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -18,31 +30,82 @@ export function Pomodoro() {
   const [breakTime, setBreakTime] = useState(5); // 5 minutes default
   const [timerActive, setTimerActive] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const activitiesCollection: CollectionReference | null = auth?.uid
+    ? collection(db, "users", auth.uid, "activities")
+    : null;
+
+  useEffect(() => {
+    const checkNotificationPermission = async () => {
+      const permission = await Notification.requestPermission();
+      if (permission === "default") {
+        setShowNotificationModal(true);
+      } else if (permission === "granted") {
+        setNotificationsEnabled(true);
+      }
+    };
+
+    checkNotificationPermission();
+  }, []);
+
+  const handleRequestPermission = async () => {
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      setNotificationsEnabled(true);
+    }
+    setShowNotificationModal(false);
+  };
+
+  const handleDismissPermission = () => {
+    setShowNotificationModal(false);
+  };
 
   const updateActivities = useCallback((newActivities: Activity[]) => {
     setActivities(newActivities);
     localStorage.setItem("activities", JSON.stringify(newActivities));
   }, []);
 
-  const addActivity = (newActivity: Activity) => {
+  const addActivity = async (newActivity: Activity) => {
+    if (activitiesCollection) {
+      try {
+        const docRef = await addDoc(activitiesCollection, newActivity);
+        newActivity.id = docRef.id;
+      } catch (error) {
+        console.error("Error adding new activity to Firestore:", error);
+      }
+    }
     updateActivities([...activities, newActivity]);
     if (!currentActivity && !timerActive) {
       startActivity(newActivity);
     }
   };
 
-  const startActivity = (activity: Activity) => {
-    const now = new Date();
-    setCurrentActivity({
-      ...activity,
-      status: "Em andamento",
-      startDate: now.toISOString(),
-    });
-    setTimeLeft(activity.duration);
-    setIsWorking(true);
-    setIsRunning(true);
-    setTimerActive(true);
-  };
+  const startActivity = useCallback(
+    (activity: Activity) => {
+      const now = new Date();
+      const updatedActivity: Activity = {
+        ...activity,
+        status: "Em andamento",
+        startDate: now.toISOString(),
+      };
+      setCurrentActivity(updatedActivity);
+      setTimeLeft(activity.duration);
+      setIsWorking(true);
+      setIsRunning(true);
+      setTimerActive(true);
+
+      if (activitiesCollection && activity.id) {
+        const activityRef: DocumentReference = doc(
+          activitiesCollection,
+          activity.id
+        );
+        updateDoc(activityRef, updatedActivity).catch((error) => {
+          console.error("Error updating activity status in Firestore:", error);
+        });
+      }
+    },
+    [activitiesCollection]
+  );
 
   const moveToNextActivity = useCallback(() => {
     const nextActivity = activities.find((a) => a.status === "Pendente");
@@ -53,7 +116,7 @@ export function Pomodoro() {
       setIsRunning(false);
       setTimerActive(false);
     }
-  }, [activities]);
+  }, [activities, startActivity]);
 
   const startBreak = useCallback(() => {
     setIsWorking(false);
@@ -62,17 +125,16 @@ export function Pomodoro() {
     setTimerActive(true);
   }, [breakTime]);
 
-  const finishCurrentActivity = useCallback(() => {
+  const finishCurrentActivity = useCallback(async () => {
     if (currentActivity) {
       const now = new Date();
+      const updatedActivity: Activity = {
+        ...currentActivity,
+        status: "Completa",
+        endDate: now.toISOString(),
+      };
       const updatedActivities = activities.map((a) =>
-        a.name === currentActivity.name
-          ? {
-              ...currentActivity,
-              status: "Completa" as const,
-              endDate: now.toISOString(),
-            }
-          : a
+        a.id === currentActivity.id ? updatedActivity : a
       );
       updateActivities(updatedActivities);
       setCurrentActivity(null);
@@ -83,6 +145,21 @@ export function Pomodoro() {
           `${currentActivity.name} foi finalizada.`
         );
       }
+
+      if (activitiesCollection && currentActivity.id) {
+        const activityRef: DocumentReference = doc(
+          activitiesCollection,
+          currentActivity.id
+        );
+        try {
+          await updateDoc(activityRef, updatedActivity);
+        } catch (error) {
+          console.error(
+            "Error updating completed activity in Firestore:",
+            error
+          );
+        }
+      }
     }
   }, [
     activities,
@@ -90,23 +167,38 @@ export function Pomodoro() {
     updateActivities,
     startBreak,
     notificationsEnabled,
+    activitiesCollection,
   ]);
 
-  const cancelActivity = () => {
+  const cancelActivity = async () => {
     if (currentActivity) {
       const now = new Date();
+      const updatedActivity: Activity = {
+        ...currentActivity,
+        status: "Cancelada",
+        endDate: now.toISOString(),
+      };
       const updatedActivities = activities.map((a) =>
-        a.name === currentActivity.name
-          ? {
-              ...currentActivity,
-              status: "Cancelada",
-              endDate: now.toISOString(),
-            }
-          : a
+        a.id === currentActivity.id ? updatedActivity : a
       );
-      updateActivities(updatedActivities as Activity[]);
+      updateActivities(updatedActivities);
       setCurrentActivity(null);
       startBreak();
+
+      if (activitiesCollection && currentActivity.id) {
+        const activityRef: DocumentReference = doc(
+          activitiesCollection,
+          currentActivity.id
+        );
+        try {
+          await updateDoc(activityRef, updatedActivity);
+        } catch (error) {
+          console.error(
+            "Error updating cancelled activity in Firestore:",
+            error
+          );
+        }
+      }
     }
   };
 
@@ -155,7 +247,7 @@ export function Pomodoro() {
       interval = setInterval(() => {
         setTimeLeft((time) => time - 1);
         if (currentActivity) {
-          setCurrentActivity((activity: Activity | null) =>
+          setCurrentActivity((activity) =>
             activity
               ? { ...activity, timeWorked: activity.timeWorked + 1 }
               : null
@@ -228,7 +320,13 @@ export function Pomodoro() {
           disabled={timerActive}
         />
       </div>
-      <History activities={activities} />
+      <History />
+      {showNotificationModal && (
+        <NotificationPermission
+          onRequestPermission={handleRequestPermission}
+          onDismiss={handleDismissPermission}
+        />
+      )}
     </div>
   );
 }

@@ -9,7 +9,11 @@ interface SettingsProps {
   disabled: boolean;
 }
 
-export function Settings({ breakTime, onBreakTimeChange, disabled }: SettingsProps) {
+export function Settings({
+  breakTime,
+  onBreakTimeChange,
+  disabled,
+}: SettingsProps) {
   return (
     <Card>
       <CardHeader>
