@@ -13,6 +13,38 @@ export const metadata: Metadata = {
   title: { template: "%s | PomoPro", default: "PomoPro" },
   description:
     "O PomoPro é uma aplicação de produtividade baseado na técnica Pomodoro.",
+  openGraph: {
+    title: "PomoPro",
+    description:
+      "O PomoPro é uma aplicação de produtividade baseado na técnica Pomodoro.",
+    url: "https://pomopro.vercel.app",
+    siteName: "monnuery.dev",
+    images: [
+      {
+        url: "https://pomopro.vercel.app/og.png",
+        width: 1920,
+        height: 1080,
+      },
+    ],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  twitter: {
+    title: "monnuery.dev",
+    card: "summary_large_image",
+  },
+  icons: {
+    shortcut: "./icon.png",
+  },
 };
 
 export default function RootLayout({
