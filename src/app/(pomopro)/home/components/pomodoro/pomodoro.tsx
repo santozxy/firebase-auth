@@ -18,7 +18,6 @@ import {
   DocumentReference,
 } from "firebase/firestore";
 import { useAuth } from "@/hooks/use-auth";
-import { NotificationPermission } from "./notification-permission";
 
 export function Pomodoro() {
   const auth = useAuth().user;
@@ -34,31 +33,6 @@ export function Pomodoro() {
   const activitiesCollection: CollectionReference | null = auth?.uid
     ? collection(db, "users", auth.uid, "activities")
     : null;
-
-  useEffect(() => {
-    const checkNotificationPermission = async () => {
-      const permission = await Notification.requestPermission();
-      if (permission === "default") {
-        setShowNotificationModal(true);
-      } else if (permission === "granted") {
-        setNotificationsEnabled(true);
-      }
-    };
-
-    checkNotificationPermission();
-  }, []);
-
-  const handleRequestPermission = async () => {
-    const permission = await Notification.requestPermission();
-    if (permission === "granted") {
-      setNotificationsEnabled(true);
-    }
-    setShowNotificationModal(false);
-  };
-
-  const handleDismissPermission = () => {
-    setShowNotificationModal(false);
-  };
 
   const updateActivities = useCallback((newActivities: Activity[]) => {
     setActivities(newActivities);
@@ -217,17 +191,6 @@ export function Pomodoro() {
     }
   };
 
-  const toggleNotifications = async () => {
-    if (!notificationsEnabled) {
-      const permission = await Notification.requestPermission();
-      if (permission === "granted") {
-        setNotificationsEnabled(true);
-      }
-    } else {
-      setNotificationsEnabled(false);
-    }
-  };
-
   const showNotification = (title: string, body: string) => {
     if (Notification.permission === "granted") {
       new Notification(title, { body });
@@ -282,27 +245,8 @@ export function Pomodoro() {
   ]);
 
   return (
-    <div className="p-4 w-full grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-4">
+    <div className=" w-full grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-4">
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">PomoPro</h1>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={toggleNotifications}
-            title={
-              notificationsEnabled
-                ? "Desativar notificações"
-                : "Ativar notificações"
-            }
-          >
-            {notificationsEnabled ? (
-              <Bell className="h-4 w-4" />
-            ) : (
-              <BellOff className="h-4 w-4 animate-pulse duration-700" />
-            )}
-          </Button>
-        </div>
         <ActivityForm onAddActivity={addActivity} disabled={timerActive} />
         <Timer
           currentActivity={currentActivity}
@@ -321,12 +265,6 @@ export function Pomodoro() {
         />
       </div>
       <History />
-      {showNotificationModal && (
-        <NotificationPermission
-          onRequestPermission={handleRequestPermission}
-          onDismiss={handleDismissPermission}
-        />
-      )}
     </div>
   );
 }
