@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     },
   },
   twitter: {
-    title: "monnuery.dev",
+    title: "PomoPro",
     card: "summary_large_image",
   },
   icons: {
