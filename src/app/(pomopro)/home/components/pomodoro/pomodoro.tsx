@@ -6,8 +6,6 @@ import { Timer } from "./timer";
 import { Settings } from "./settings";
 import { History } from "./history/history";
 import { Activity } from "@/domain/history/types";
-import { Button } from "@/components/ui/button";
-import { Bell, BellOff } from "lucide-react";
 import { db } from "@/app/lib/firebase/config";
 import {
   addDoc,
@@ -298,14 +296,7 @@ export function Pomodoro() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [
-    isRunning,
-    timeLeft,
-    isWorking,
-    currentActivity,
-    finishCurrentActivity,
-    moveToNextActivity,
-  ]);
+  }, [isRunning, timeLeft, isWorking, currentActivity, finishCurrentActivity, moveToNextActivity, timerActive]);
 
   return (
     <div className=" w-full grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-4">
