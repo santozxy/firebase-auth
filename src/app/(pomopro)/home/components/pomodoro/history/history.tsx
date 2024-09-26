@@ -90,7 +90,7 @@ export function History() {
   const memoizedActivities = useMemo(() => activities, [activities]);
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center">
           <HistoryIcon className="mr-2" aria-hidden="true" />
@@ -98,7 +98,7 @@ export function History() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[40rem] pr-4">
+        <ScrollArea className="h-[44rem] pr-4">
           {isLoading ? (
             <ul className="space-y-4">
               {[...Array(5)].map((_, index) => (

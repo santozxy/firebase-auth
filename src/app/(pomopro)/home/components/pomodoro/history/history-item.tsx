@@ -51,7 +51,7 @@ export function HistoryItem({ activity, onDelete }: ActivityItemProps) {
                   disabled={activity.status === "Em andamento"}
                   aria-label="Excluir atividade"
                 >
-                  <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -64,7 +64,7 @@ export function HistoryItem({ activity, onDelete }: ActivityItemProps) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => onDelete(activity)}>
+                  <AlertDialogAction  onClick={() => onDelete(activity)} >
                     Excluir
                   </AlertDialogAction>
                 </AlertDialogFooter>
