@@ -17,7 +17,7 @@ export function Header() {
     );
 
   return (
-    <header className="p-4 flex justify-between items-center sticky top-0 z-50 border-b">
+    <header className="p-4 flex justify-between items-center sticky top-0 z-50 border-b bg-background">
       <div className="flex items-center justify-center">
         {user?.displayName && (
           <h1 className="text-xl font-semibold">Olá, {user.displayName}! 👋</h1>

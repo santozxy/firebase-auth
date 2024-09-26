@@ -43,7 +43,7 @@ export function Timer({
       </CardHeader>
       <CardContent>
         <div className="text-center">
-          <h2 className="text-7xl font-sembold mb-4" aria-live="polite">
+          <h2 className="text-7xl font-sembold font-black mb-4" aria-live="polite">
             {formatTime(timeLeft)}
           </h2>
           <p className="text-xl mb-4">
