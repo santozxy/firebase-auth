@@ -13,21 +13,9 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { Timer, UserPlus } from "lucide-react";
-//import { initializeApp } from "firebase/app";
-//import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { useToast } from "@/hooks/use-toast"
-
-// Configuração do Firebase
-// const firebaseConfig = {
-//   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-//   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-//   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-//   // Adicione outras configurações conforme necessário
-// };
-
-// // Inicialize o Firebase
-// const app = initializeApp(firebaseConfig);
-// const auth = getAuth(app);
+import { useToast } from "@/hooks/use-toast";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../lib/firebase/config";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -49,14 +37,21 @@ export default function Register() {
 
     setIsLoading(true);
     try {
-      //await createUserWithEmailAndPassword(auth, email, password);
+      const response = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      console.log({ response });
       toast({
         title: "Sucesso",
         description: "Conta criada com sucesso!",
       });
-      // Redirecionar para a página de login ou dashboard
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
     } catch (error) {
-        console.log(error)
+      console.error(error);
       toast({
         title: "Erro",
         description: "Falha ao criar conta. Por favor, tente novamente.",
