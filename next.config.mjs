@@ -7,8 +7,14 @@ const nextConfig = {
         hostname: "github.com",
         pathname: "/santozxy.png",
       },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/a/**",
+      }
     ],
   },
+  
 };
 
 export default nextConfig;
