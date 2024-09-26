@@ -1,4 +1,3 @@
-
 export interface Activity {
   [x: string]: unknown;
   name: string;
@@ -7,4 +6,5 @@ export interface Activity {
   timeWorked: number;
   startDate: string | null;
   endDate: string | null;
+  classification: "Estudos" | "Trabalho" | "Lazer" | "Outros";
 }

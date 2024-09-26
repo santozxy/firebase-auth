@@ -16,7 +16,7 @@ import {
 import { db } from "@/app/lib/firebase/config";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "@/hooks/use-toast";
-import { ActivityItem } from "./activity-item";
+import { HistoryItem } from "./history-item";
 import { Loading } from "./loading";
 
 export interface ActivityWithId extends Activity {
@@ -112,7 +112,7 @@ export function History() {
           ) : (
             <ul className="space-y-4">
               {memoizedActivities.map((activity) => (
-                <ActivityItem
+                <HistoryItem
                   key={activity.id}
                   activity={activity}
                   onDelete={handleDelete}
