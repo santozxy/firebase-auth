@@ -7,33 +7,33 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuSub,
-  DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sun, Moon, Laptop, LogOut } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Sun, User } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@/app/lib/firebase/config";
+import { ButtonLogout } from "./button-logout";
+import { DropdownTheme } from "./dropdown-theme";
 
 export function DropdownOptions() {
-  const router = useRouter();
-  const { setTheme } = useTheme();
+  const [user] = useAuthState(auth);
 
-  const handleLogout = () => {
-    router.push("/login");
-  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="w-10 h-10 rounded-full p-0">
-          <Image
-            src="https://github.com/santozxy.png"
-            alt="Profile"
-            width={40}
-            height={40}
-            className="w-full h-full rounded-full"
-          />
+          {user?.photoURL && (
+            <Image
+              src={user.photoURL}
+              alt="Profile"
+              width={40}
+              height={40}
+              className="w-full h-full rounded-full"
+            />
+          )}
+          <User className="w-6 h-6" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -45,24 +45,11 @@ export function DropdownOptions() {
             <Sun className="mr-2 h-4 w-4" />
             <span>Tema</span>
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem onClick={() => setTheme("light")}>
-              <Sun className="mr-2 h-4 w-4" />
-              <span>Claro</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
-              <Moon className="mr-2 h-4 w-4" />
-              <span>Escuro</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("system")}>
-              <Laptop className="mr-2 h-4 w-4" />
-              <span>Sistema</span>
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
+          <DropdownTheme />
         </DropdownMenuSub>
-        <DropdownMenuItem onClick={handleLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Sair</span>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <ButtonLogout />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
