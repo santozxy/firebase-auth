@@ -97,7 +97,7 @@ export function Pomodoro() {
       if (activitiesCollection && activity.id) {
         const activityRef: DocumentReference = doc(
           activitiesCollection,
-          activity.id
+          activity.id as string
         );
         updateDoc(activityRef, updatedActivity).catch((error) => {
           console.error("Error updating activity status in Firestore:", error);
@@ -149,7 +149,7 @@ export function Pomodoro() {
       if (activitiesCollection && currentActivity.id) {
         const activityRef: DocumentReference = doc(
           activitiesCollection,
-          currentActivity.id
+          currentActivity.id as string
         );
         try {
           await updateDoc(activityRef, updatedActivity);
@@ -188,7 +188,7 @@ export function Pomodoro() {
       if (activitiesCollection && currentActivity.id) {
         const activityRef: DocumentReference = doc(
           activitiesCollection,
-          currentActivity.id
+          currentActivity.id as string
         );
         try {
           await updateDoc(activityRef, updatedActivity);

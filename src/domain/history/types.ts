@@ -1,6 +1,6 @@
 
 export interface Activity {
-  [x: string]: any;
+  [x: string]: unknown;
   name: string;
   duration: number;
   status: "Pendente" | "Em andamento" | "Completa" | "Cancelada";
