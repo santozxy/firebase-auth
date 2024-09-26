@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     description:
       "O PomoPro é uma aplicação de produtividade baseado na técnica Pomodoro.",
     url: "https://pomopro.vercel.app",
-    siteName: "monnuery.dev",
+    siteName: "PomoPro",
     images: [
       {
         url: "https://pomopro.vercel.app/og.png",
