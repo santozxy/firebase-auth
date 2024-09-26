@@ -39,6 +39,13 @@ export function FormLogin() {
       if (userCredential) {
         return router.push("/home");
       }
+      if (!userCredential) {
+        toast({
+          title: "Erro",
+          description: "Usuário ou senha inválidos.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error(error);
       toast({
@@ -56,6 +63,14 @@ export function FormLogin() {
     try {
       const response = await signInWithGoogle();
       if (response) router.push("/home");
+      if (!response) {
+        toast({
+          title: "Erro",
+          description:
+            "Falha ao fazer login com Google. Por favor, tente novamente.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error(error);
       toast({
