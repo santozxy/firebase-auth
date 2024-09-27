@@ -1,22 +1,21 @@
-"use client";
+'use client'
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { ActivityForm } from "./activity-form";
-import { Timer } from "./timer";
-import { Settings } from "./settings";
-import { Activity } from "@/domain/history/types";
+import { useState, useEffect, useCallback, useRef } from "react"
+import { ActivityForm } from "./activity-form"
+import { Timer } from "./timer"
+import { Settings } from "./settings"
+import { Activity } from "@/domain/history/types"
 import {
   addDoc,
   doc,
   updateDoc,
   DocumentReference,
   deleteDoc,
-} from "firebase/firestore";
-import { saveStateToLocalStorage, showNotificationOrToast } from "./helpers";
-import {
-  AlertDialogHeader,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore"
+import { showNotificationOrToast } from "./helpers"
 import {
   AlertDialog,
   AlertDialogContent,
@@ -24,287 +23,319 @@ import {
   AlertDialogDescription,
   AlertDialogCancel,
   AlertDialogAction,
-} from "@/components/ui/alert-dialog";
-import { useCollection } from "@/hooks/use-collections";
+  AlertDialogHeader,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog"
+import { useCollection } from "@/hooks/use-collections"
+import { usePomodoroContext } from "@/context/pomodoro-context"
 
 export function Pomodoro() {
-  const { activitiesCollection } = useCollection();
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [isWorking, setIsWorking] = useState(true);
-  const [isRunning, setIsRunning] = useState(false);
-  const [breakTime, setBreakTime] = useState(5); // 5 minutes default
-  const [timerActive, setTimerActive] = useState(false);
-  const [inProgressActivity, setInProgressActivity] = useState<Activity | null>(
-    null
-  );
-  const [showDialog, setShowDialog] = useState(false);
-  const activityCompleteAudioRef = useRef<HTMLAudioElement | null>(null);
-  const breakCompleteAudioRef = useRef<HTMLAudioElement | null>(null);
+  const { activitiesCollection } = useCollection()
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [breakTime, setBreakTime] = useState(5)
+  const [inProgressActivity, setInProgressActivity] = useState<Activity | null>(null)
+  const [showDialog, setShowDialog] = useState(false)
+  const activityCompleteAudioRef = useRef<HTMLAudioElement | null>(null)
+  const breakCompleteAudioRef = useRef<HTMLAudioElement | null>(null)
+
+  const {
+    currentActivity,
+    timeLeft,
+    isWorking,
+    isRunning,
+    timerActive,
+    dialogShown,
+    setCurrentActivity,
+    setTimeLeft,
+    setIsWorking,
+    setIsRunning,
+    setTimerActive,
+    setDialogShown,
+  } = usePomodoroContext()
 
   const updateActivities = useCallback((newActivities: Activity[]) => {
-    setActivities(newActivities);
-    localStorage.setItem("activities", JSON.stringify(newActivities));
-  }, []);
+    setActivities(newActivities)
+    localStorage.setItem("activities", JSON.stringify(newActivities))
+  }, [])
 
   const addActivity = async (newActivity: Activity) => {
     if (activitiesCollection) {
       try {
-        const docRef = await addDoc(activitiesCollection, newActivity);
-        newActivity.id = docRef.id;
+        const docRef = await addDoc(activitiesCollection, newActivity)
+        newActivity.id = docRef.id
       } catch (error) {
-        console.error("Error adding new activity to Firestore:", error);
+        console.error("Error adding new activity to Firestore:", error)
       }
     }
-    updateActivities([...activities, newActivity]);
+    updateActivities([...activities, newActivity])
     if (!currentActivity && !timerActive) {
-      startActivity(newActivity);
+      startActivity(newActivity)
     }
-  };
+  }
 
   const startActivity = useCallback(
     (activity: Activity) => {
-      const now = new Date();
+      const now = new Date()
       const updatedActivity: Activity = {
         ...activity,
         status: "Em andamento",
         startDate: now.toISOString(),
-      };
-      setCurrentActivity(updatedActivity);
-      setTimeLeft(activity.duration);
-      setIsWorking(true);
-      setIsRunning(true);
-      setTimerActive(true);
+      }
+      setCurrentActivity(updatedActivity)
+      setTimeLeft(activity.duration)
+      setIsWorking(true)
+      setIsRunning(true)
+      setTimerActive(true)
 
       if (activitiesCollection && activity.id) {
         const activityRef: DocumentReference = doc(
           activitiesCollection,
           activity.id as string
-        );
+        )
         updateDoc(activityRef, updatedActivity).catch((error) => {
-          console.error("Error updating activity status in Firestore:", error);
-        });
+          console.error("Error updating activity status in Firestore:", error)
+        })
       }
-      saveStateToLocalStorage(
-        updatedActivity,
-        activity.duration,
-        true,
-        true,
-        true
-      );
     },
-    [activitiesCollection]
-  );
+    [activitiesCollection, setCurrentActivity, setTimeLeft, setIsWorking, setIsRunning, setTimerActive]
+  )
 
   const moveToNextActivity = useCallback(() => {
-    const nextActivity = activities.find((a) => a.status === "Pendente");
+    const nextActivity = activities.find((a) => a.status === "Pendente")
     if (nextActivity) {
-      startActivity(nextActivity);
+      startActivity(nextActivity)
     } else {
-      setCurrentActivity(null);
-      setIsRunning(false);
-      setTimerActive(false);
-      saveStateToLocalStorage(null, 0, true, false, false);
+      setCurrentActivity(null)
+      setIsRunning(false)
+      setTimerActive(false)
     }
-  }, [activities, startActivity]);
+  }, [activities, startActivity, setCurrentActivity, setIsRunning, setTimerActive])
 
   const startBreak = useCallback(() => {
-    setIsWorking(false);
-    setTimeLeft(breakTime * 60);
-    setIsRunning(true);
-    setTimerActive(true);
-    saveStateToLocalStorage(null, breakTime * 60, false, true, true);
-  }, [breakTime]);
+    setIsWorking(false)
+    setTimeLeft(breakTime * 60)
+    setIsRunning(true)
+    setTimerActive(true)
+  }, [breakTime, setIsWorking, setTimeLeft, setIsRunning, setTimerActive])
 
   const finishCurrentActivity = useCallback(async () => {
     if (currentActivity) {
-      const now = new Date();
+      const now = new Date()
       const updatedActivity: Activity = {
         ...currentActivity,
         status: "Completa",
         endDate: now.toISOString(),
-      };
+      }
+      console.log("currentActivity", currentActivity)
       const updatedActivities = activities.map((a) =>
         a.id === currentActivity.id ? updatedActivity : a
-      );
-      updateActivities(updatedActivities);
-      setCurrentActivity(null);
-      startBreak();
-      playSound("activity");
+      )
+      updateActivities(updatedActivities)
+      setCurrentActivity(null)
+      playSound("activity")
       showNotificationOrToast(
         "Atividade concluída!",
         `${currentActivity.name} foi finalizada.`
-      );
+      )
 
       if (activitiesCollection && currentActivity.id) {
+        console.log("Entrou aqui")
         const activityRef: DocumentReference = doc(
           activitiesCollection,
           currentActivity.id as string
-        );
+        )
         try {
-          await updateDoc(activityRef, updatedActivity);
+          await updateDoc(activityRef, updatedActivity)
         } catch (error) {
           console.error(
             "Error updating completed activity in Firestore:",
             error
-          );
+          )
         }
       }
+
+      // Iniciar o descanso automaticamente após a conclusão da atividade
+      startBreak()
     }
-  }, [
-    activities,
-    currentActivity,
-    updateActivities,
-    startBreak,
-    activitiesCollection,
-  ]);
+  }, [activities, currentActivity, updateActivities, startBreak, activitiesCollection, setCurrentActivity])
 
   const cancelActivity = async () => {
     if (currentActivity) {
-      const now = new Date();
+      const now = new Date()
       const updatedActivity: Activity = {
         ...currentActivity,
         status: "Cancelada",
         endDate: now.toISOString(),
-      };
+      }
       const updatedActivities = activities.map((item) =>
         item.id === currentActivity.id ? updatedActivity : item
-      );
-      updateActivities(updatedActivities);
-      setCurrentActivity(null);
-      startBreak();
+      )
+      updateActivities(updatedActivities)
+      setCurrentActivity(null)
+      startBreak()
 
       if (activitiesCollection && currentActivity.id) {
         const activityRef: DocumentReference = doc(
           activitiesCollection,
           currentActivity.id as string
-        );
+        )
         try {
-          await updateDoc(activityRef, updatedActivity);
+          await updateDoc(activityRef, updatedActivity)
         } catch (error) {
           console.error(
             "Error updating cancelled activity in Firestore:",
             error
-          );
+          )
         }
       }
     }
-  };
+  }
 
   const skipBreak = () => {
     if (!isWorking) {
-      setIsWorking(true);
-      setTimeLeft(0);
-      moveToNextActivity();
+      setIsWorking(true)
+      setTimeLeft(0)
+      moveToNextActivity()
     }
-  };
+  }
 
   const toggleTimer = () => {
-    const newIsRunning = !isRunning;
-    setIsRunning(newIsRunning);
+    const newIsRunning = !isRunning
+    setIsRunning(newIsRunning)
     if (!timerActive) {
-      setTimerActive(true);
+      setTimerActive(true)
     }
-    saveStateToLocalStorage(
-      currentActivity,
-      timeLeft,
-      isWorking,
-      newIsRunning,
-      true
-    );
-  };
+  }
 
   const playSound = (type: "activity" | "break") => {
     if (type === "activity" && activityCompleteAudioRef.current) {
-      activityCompleteAudioRef.current.play();
+      activityCompleteAudioRef.current.play()
     } else if (type === "break" && breakCompleteAudioRef.current) {
-      breakCompleteAudioRef.current.play();
+      breakCompleteAudioRef.current.play()
     }
-  };
+  }
+
+  const checkForPendingActivities = useCallback(async () => {
+    if (!activitiesCollection) return
+    const q = query(activitiesCollection, where("status", "==", "Pendente"))
+    const querySnapshot = await getDocs(q)
+    if (!querySnapshot.empty) {
+      const pendingActivity = querySnapshot.docs[0]
+      setInProgressActivity({
+        ...pendingActivity.data(),
+        id: pendingActivity.id,
+      } as unknown as Activity)
+      setShowDialog(true)
+      setDialogShown(true)
+    }
+  }, [activitiesCollection, setDialogShown])
+
+  const checkForInProgressActivities = useCallback(async () => {
+    if (!activitiesCollection || dialogShown) return
+
+    const q = query(
+      activitiesCollection,
+      where("status", "==", "Em andamento")
+    )
+    const querySnapshot = await getDocs(q)
+
+    if (!querySnapshot.empty) {
+      const inProgressActivity = querySnapshot.docs[0]
+      setInProgressActivity({
+        ...inProgressActivity.data(),
+        id: inProgressActivity.id,
+      } as unknown as Activity)
+      setShowDialog(true)
+      setDialogShown(true)
+    } else {
+      await checkForPendingActivities()
+    }
+  }, [
+    activitiesCollection,
+    checkForPendingActivities,
+    dialogShown,
+    setDialogShown,
+  ])
+
+  const handleResumeActivity = () => {
+    if (inProgressActivity) {
+      startActivity(inProgressActivity)
+    }
+    setShowDialog(false)
+  }
+
+  const handleDeleteActivity = async () => {
+    if (inProgressActivity && inProgressActivity.id && activitiesCollection) {
+      try {
+        await deleteDoc(
+          doc(activitiesCollection, inProgressActivity.id as string)
+        )
+        const updatedActivities = activities.filter(
+          (a) => a.id !== inProgressActivity.id
+        )
+        updateActivities(updatedActivities)
+        checkForPendingActivities()
+      } catch (error) {
+        console.error("Error deleting activity from Firestore:", error)
+      }
+    }
+    setShowDialog(false)
+  }
 
   useEffect(() => {
-    const storedActivities = localStorage.getItem("activities");
-    if (storedActivities) {
-      setActivities(JSON.parse(storedActivities));
-    }
+    checkForInProgressActivities()
+  }, [checkForInProgressActivities])
 
-    const storedState = localStorage.getItem("pomodoroState");
-    if (storedState) {
-      const state = JSON.parse(storedState);
-      const timePassed = (new Date().getTime() - state.lastUpdated) / 1000;
-      const updatedTimeLeft = Math.max(
-        0,
-        state.timeLeft - (state.isRunning ? Math.floor(timePassed) : 0)
-      );
-
-      setCurrentActivity(state.currentActivity);
-      setTimeLeft(updatedTimeLeft);
-      setIsWorking(state.isWorking);
-      setIsRunning(state.isRunning);
-      setTimerActive(state.timerActive);
-    }
-  }, []);
   useEffect(() => {
-    activityCompleteAudioRef.current = new Audio("/activity-complete.mp3");
-    breakCompleteAudioRef.current = new Audio("/break-complete.mp3");
+    activityCompleteAudioRef.current = new Audio("/activity-complete.mp3")
+    breakCompleteAudioRef.current = new Audio("/break-complete.mp3")
 
     return () => {
       if (activityCompleteAudioRef.current) {
-        activityCompleteAudioRef.current = null;
+        activityCompleteAudioRef.current = null
       }
       if (breakCompleteAudioRef.current) {
-        breakCompleteAudioRef.current = null;
+        breakCompleteAudioRef.current = null
       }
-    };
-  }, []);
+    }
+  }, [])
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    let interval: NodeJS.Timeout | null = null
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
         setTimeLeft((time) => {
-          const newTime = time - 1;
-          const minutes = Math.floor(newTime / 60);
-          const seconds = newTime % 60;
-
-          document.title =
-            `${minutes < 10 ? "0" : ""}${minutes}:${
-              seconds < 10 ? "0" : ""
-            }${seconds}` + " - Pomopro";
-          saveStateToLocalStorage(
-            currentActivity,
-            newTime,
-            isWorking,
-            isRunning,
-            timerActive
-          );
-          return newTime;
-        });
+          const newTime = time - 1
+          return newTime
+        })
         if (currentActivity) {
-          setCurrentActivity((activity) =>
-            activity
-              ? { ...activity, timeWorked: activity.timeWorked + 1 }
-              : null
-          );
+          setCurrentActivity((activity) => {
+            if (activity) {
+              return {
+                ...activity,
+                timeWorked: (activity.timeWorked || 0) + 1,
+              }
+            }
+            return activity
+          })
         }
-      }, 1000);
+      }, 1000)
     } else if (timeLeft === 0) {
       if (isWorking) {
-        finishCurrentActivity();
+        finishCurrentActivity()
       } else {
-        setIsWorking(true);
-        moveToNextActivity();
-        playSound("break");
+        setIsWorking(true)
+        moveToNextActivity()
+        playSound("break")
         showNotificationOrToast(
           "Intervalo finalizado!",
           "Hora de voltar ao trabalho!"
-        );
+        )
       }
     }
     return () => {
-      if (interval) clearInterval(interval);
-    };
+      if (interval) clearInterval(interval)
+    }
   }, [
     isRunning,
     timeLeft,
@@ -312,48 +343,10 @@ export function Pomodoro() {
     currentActivity,
     finishCurrentActivity,
     moveToNextActivity,
-    timerActive,
-  ]);
-
-  // ... (mantenha as outras funções)
-
-  const checkForInProgressActivities = useCallback(() => {
-    const inProgress = activities.find((a) => a.status === "Em andamento");
-    if (inProgress && !currentActivity && !timerActive) {
-      setInProgressActivity(inProgress);
-      setShowDialog(true);
-    }
-  }, [activities, currentActivity, timerActive]);
-
-  const handleResumeActivity = () => {
-    if (inProgressActivity) {
-      startActivity(inProgressActivity);
-    }
-    setShowDialog(false);
-  };
-
-  const handleDeleteActivity = async () => {
-    if (inProgressActivity && inProgressActivity.id && activitiesCollection) {
-      try {
-        if (inProgressActivity.id) {
-          await deleteDoc(
-            doc(activitiesCollection, inProgressActivity.id as string)
-          );
-        }
-        const updatedActivities = activities.filter(
-          (a) => a.id !== inProgressActivity.id
-        );
-        updateActivities(updatedActivities);
-      } catch (error) {
-        console.error("Error deleting activity from Firestore:", error);
-      }
-    }
-    setShowDialog(false);
-  };
-
-  useEffect(() => {
-    checkForInProgressActivities();
-  }, [checkForInProgressActivities]);
+    setTimeLeft,
+    setCurrentActivity,
+    setIsWorking,
+  ])
 
   return (
     <div className="space-y-4">
@@ -393,5 +386,5 @@ export function Pomodoro() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  );
+  )
 }
