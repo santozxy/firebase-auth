@@ -12,15 +12,15 @@ export function Header() {
         <Image
           src={logoLight}
           alt="PomoPro"
-          width={30}
-          height={30}
+          width={35}
+          height={35}
           className="rounded-full dark:block hidden"
         />
         <Image
           src={logoDark}
           alt="PomoPro"
-          width={30}
-          height={30}
+          width={35}
+          height={35}
           className="rounded-full dark:hidden"
         />
         <h1 className="text-2xl font-bold">PomoPro</h1>

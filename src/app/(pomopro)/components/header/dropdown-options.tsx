@@ -65,8 +65,8 @@ export function DropdownOptions() {
             <Image
               src={user.photoURL}
               alt="Foto de perfil"
-              width={40}
-              height={40}
+              width={35}
+              height={35}
               className="w-full h-full rounded-full"
             />
           ) : (
