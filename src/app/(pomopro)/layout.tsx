@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "../lib/firebase/admin";
 import { Header } from "./components/header/header";
 
 export default async function LayoutPomoPro({
@@ -5,6 +7,8 @@ export default async function LayoutPomoPro({
 }: {
   children: React.ReactNode;
 }) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) redirect("/login");
   return (
     <div>
       <Header />
