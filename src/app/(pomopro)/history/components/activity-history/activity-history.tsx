@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { History as HistoryIcon, Filter, X } from "lucide-react";
 import { Activity } from "@/domain/history/types";
@@ -82,16 +82,6 @@ export function ActivityHistory() {
   const handleDelete = useCallback(
     async (activity: ActivityWithId) => {
       if (!uuid || !activity.id) return;
-
-      if (activity.status === "Em andamento") {
-        return toast({
-          itemID: "activity-delete-error",
-          title: "Erro",
-          description: "Não é possível excluir uma atividade em andamento.",
-          variant: "destructive",
-        });
-      }
-
       try {
         await deleteDoc(doc(db, "users", uuid, "activities", activity.id));
         toast({
@@ -165,11 +155,7 @@ export function ActivityHistory() {
     setShowCompletedOnly(false);
   };
 
-  const uniqueClassifications = useMemo(() => {
-    const classifications = new Set(activities.map((a) => a.classification));
-    return Array.from(classifications);
-  }, [activities]);
-
+  const classifications = ["Estudo", "Trabalho", "Lazer", "Outro"];
   return (
     <Card className="">
       <CardHeader>
@@ -251,7 +237,7 @@ export function ActivityHistory() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">Todas</SelectItem>
-                          {uniqueClassifications.map((classification) => (
+                          {classifications.map((classification) => (
                             <SelectItem
                               key={classification}
                               value={classification}

@@ -25,11 +25,11 @@ export function ActivityForm({ onAddActivity }: ActivityFormProps) {
     useState<Activity["classification"]>("Estudos");
 
   const addActivity = () => {
-    if (!newActivityName.trim()) {
+    if (!newActivityName.trim() || newActivityName.length < 5) {
       toast({
-        title: "Preencha o nome da atividade",
+        title: "Nome da atividade inválido",
         variant: "destructive",
-        description: "O nome da atividade não pode ser vazio.",
+        description: "O nome da atividade deve ter pelo menos 5 caracteres.",
       });
       return;
     }
@@ -92,9 +92,11 @@ export function ActivityForm({ onAddActivity }: ActivityFormProps) {
             <Label htmlFor="name">Nome da Atividade</Label>
             <Input
               id="name"
-              placeholder="Ex: Estudar React"
+              placeholder="Ex: Estudar matemática"
               value={newActivityName}
+              required
               onChange={(e) => setNewActivityName(e.target.value)}
+              minLength={5}
             />
           </div>
           <div className="flex flex-col space-y-1.5">
