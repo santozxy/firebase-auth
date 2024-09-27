@@ -57,7 +57,7 @@ export function ActivityHistory() {
   const [showCompletedOnly, setShowCompletedOnly] = useState(false);
 
   useEffect(() => {
-    if (!uuid || !activitiesCollection) return;
+    if (!activitiesCollection) return;
     setIsLoading(true);
     const q = query(
       activitiesCollection,

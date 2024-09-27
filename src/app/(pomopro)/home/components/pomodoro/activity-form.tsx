@@ -16,17 +16,15 @@ import {
 
 interface ActivityFormProps {
   onAddActivity: (activity: Activity) => void;
-  disabled: boolean;
 }
 
-export function ActivityForm({ onAddActivity, disabled }: ActivityFormProps) {
+export function ActivityForm({ onAddActivity }: ActivityFormProps) {
   const [newActivityName, setNewActivityName] = useState("");
   const [newActivityDuration, setNewActivityDuration] = useState("");
   const [newActivityClassification, setNewActivityClassification] =
     useState<Activity["classification"]>("Estudos");
 
   const addActivity = () => {
-    if (disabled) return;
     if (!newActivityName.trim()) {
       toast({
         title: "Preencha o nome da atividade",
@@ -78,7 +76,6 @@ export function ActivityForm({ onAddActivity, disabled }: ActivityFormProps) {
                   value as Activity["classification"]
                 )
               }
-              disabled={disabled}
             >
               <SelectTrigger id="classification">
                 <SelectValue placeholder="Selecione uma classificação" />
@@ -98,7 +95,6 @@ export function ActivityForm({ onAddActivity, disabled }: ActivityFormProps) {
               placeholder="Ex: Estudar React"
               value={newActivityName}
               onChange={(e) => setNewActivityName(e.target.value)}
-              disabled={disabled}
             />
           </div>
           <div className="flex flex-col space-y-1.5">
@@ -109,10 +105,9 @@ export function ActivityForm({ onAddActivity, disabled }: ActivityFormProps) {
               type="number"
               value={newActivityDuration}
               onChange={(e) => setNewActivityDuration(e.target.value)}
-              disabled={disabled}
             />
           </div>
-          <Button onClick={addActivity} disabled={disabled}>
+          <Button onClick={addActivity}>
             <PlusCircle className="mr-2 h-4 w-4" /> Adicionar
           </Button>
         </div>

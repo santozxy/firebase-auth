@@ -1,46 +1,30 @@
-import { CheckCircle, XCircle, Clock } from "lucide-react";
+import { Activity } from "@/domain/history/types";
+import { toast } from "@/hooks/use-toast";
 
-export const getStatusIcon = (status: string) => {
-  switch (status) {
-    case "Completa":
-      return <CheckCircle className="h-4 w-4 text-green-500" />;
-    case "Cancelada":
-      return <XCircle className="h-4 w-4 text-red-500" />;
-    default:
-      return <Clock className="h-4 w-4 text-yellow-500" />;
+
+
+export const saveStateToLocalStorage = (
+  activity: Activity | null,
+  time: number,
+  working: boolean,
+  running: boolean,
+  active: boolean
+) => {
+  const state = {
+    currentActivity: activity,
+    timeLeft: time,
+    isWorking: working,
+    isRunning: running,
+    timerActive: active,
+    lastUpdated: new Date().getTime(),
+  };
+  localStorage.setItem("pomodoroState", JSON.stringify(state));
+};
+
+export const showNotificationOrToast = (title: string, body: string) => {
+  if (Notification.permission === "granted") {
+    new Notification(title, { body });
+  } else {
+    toast({ title, description: body });
   }
 };
-
-export const getStatusColor = (status: string) => {
-  switch (status) {
-    case "Completa":
-      return "bg-green-100 text-green-800";
-    case "Cancelada":
-      return "bg-red-100 text-red-800";
-    case "Em andamento":
-      return "bg-yellow-100 text-yellow-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-};
-
-export const timeInMinutes = (time: number) => Math.floor(time / 60);
-
-export const formatTime = (time: number): string => {
-  const minutes = Math.floor(time / 60);
-  const seconds = time % 60;
-  return `${minutes.toString().padStart(2, "0")}:${seconds
-    .toString()
-    .padStart(2, "0")}`;
-};
-
-
-export const formatDate = (date: string) => {
-  return new Date(date).toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}

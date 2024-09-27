@@ -15,8 +15,8 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react"
-import { formatTime } from "./helpers"
 import { Activity } from "@/domain/history/types"
+import { formatTime } from "@/utils/date-format"
 
 interface TimerProps {
   currentActivity: Activity | null
@@ -125,7 +125,7 @@ export function Timer({
               : "Tempo de descanso"}
           </p>
           <Badge variant={isWorking ? "default" : "secondary"} className="mb-4">
-            {isWorking ? "Trabalhando" : "Descansando"}
+            {isWorking && currentActivity ? "Trabalhando" : "Descansando"}
           </Badge>
           <div className="space-x-2">
             <Button onClick={onToggleTimer} disabled={!timeLeft}>
