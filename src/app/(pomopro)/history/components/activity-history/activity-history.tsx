@@ -16,7 +16,7 @@ import {
 import { db } from "@/app/lib/firebase/config";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "@/hooks/use-toast";
-import { ActivityHistoryItem } from "./activity-history-item";
+
 import { Loading } from "./loading";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +35,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { CardActivity } from "@/app/(pomopro)/components/card-activity/card-activity";
 
 export interface ActivityWithId extends Activity {
   id: string;
@@ -313,7 +314,7 @@ export function ActivityHistory() {
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredActivities.map((activity) => (
-                <ActivityHistoryItem
+                <CardActivity
                   key={activity.id}
                   activity={activity}
                   onDelete={handleDelete}

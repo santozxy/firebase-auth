@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { History as HistoryIcon } from "lucide-react";
+import { LayoutList } from "lucide-react";
 import { Activity } from "@/domain/history/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -16,8 +16,8 @@ import {
 import { db } from "@/app/lib/firebase/config";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "@/hooks/use-toast";
-import { QueueItem } from "./queue-item";
 import { Loading } from "./loading";
+import { CardActivity } from "@/app/(pomopro)/components/card-activity/card-activity";
 
 export interface ActivityWithId extends Activity {
   id: string;
@@ -89,8 +89,8 @@ export function Queue() {
     <Card className="overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center">
-          <HistoryIcon className="mr-2" aria-hidden="true" />
-          Histórico de Atividades
+          <LayoutList className="mr-2" aria-hidden="true" />
+          Fila de atividades
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -106,15 +106,15 @@ export function Queue() {
           ) : memoizedActivities.length === 0 ? (
             <p>Nenhuma atividade registrada.</p>
           ) : (
-            <ul className="space-y-4">
+            <div className="">
               {memoizedActivities.map((activity) => (
-                <QueueItem
+                <CardActivity
                   key={activity.id}
                   activity={activity}
                   onDelete={handleDelete}
                 />
               ))}
-            </ul>
+            </div>
           )}
         </ScrollArea>
       </CardContent>
