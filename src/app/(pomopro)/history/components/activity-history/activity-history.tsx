@@ -11,7 +11,6 @@ import {
   onSnapshot,
   doc,
   deleteDoc,
-  where,
 } from "firebase/firestore";
 import { db } from "@/app/lib/firebase/config";
 import { useAuth } from "@/hooks/use-auth";
@@ -60,11 +59,7 @@ export function ActivityHistory() {
   useEffect(() => {
     if (!activitiesCollection) return;
     setIsLoading(true);
-    const q = query(
-      activitiesCollection,
-      orderBy("startDate", "desc"),
-      where("status", "!=", "Pendente")
-    );
+    const q = query(activitiesCollection, orderBy("startDate", "desc"));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const fetchedActivities: ActivityWithId[] = [];

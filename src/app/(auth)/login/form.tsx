@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
-import { LogIn, Timer } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -23,6 +23,8 @@ import {
 
 import google from "../../../../public/google.png";
 import Image from "next/image";
+import logoDark from "../../../../public/logo-dark.png";
+import logoLight from "../../../../public/logo-light.png";
 
 export function FormLogin() {
   const [email, setEmail] = useState("");
@@ -89,7 +91,20 @@ export function FormLogin() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-2">
-            <Timer className="h-6 w-6 mr-2" aria-hidden="true" />
+            <Image
+              src={logoDark}
+              alt="PomoPro"
+              width={40}
+              height={40}
+              className="mr-2 block dark:hidden"
+            />
+            <Image
+              src={logoLight}
+              alt="PomoPro"
+              width={40}
+              height={40}
+              className="mr-2 dark:block hidden "
+            />
             <CardTitle className="text-2xl font-bold text-center">
               PomoPro
             </CardTitle>
