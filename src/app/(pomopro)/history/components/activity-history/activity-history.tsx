@@ -295,10 +295,10 @@ export function ActivityHistory() {
             </Popover>
             <Button
               onClick={resetFilters}
-              variant="destructive"
+              variant="outline"
               className=" w-full"
             >
-              <X className="mr-2 h-4 w-4" />
+              <X className="mr-2 h-4 w-4 text-destructive" />
               Limpar Filtros
             </Button>
           </div>

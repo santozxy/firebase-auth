@@ -15,6 +15,7 @@ import {
   XCircle,
   Play,
   Pause,
+  TriangleAlert,
 } from "lucide-react";
 
 import {
@@ -56,7 +57,7 @@ export const getStatusIcon = (status: string) => {
     case "Em andamento":
       return <Clock className="h-4 w-4 text-blue-500" />;
     default:
-      return <Clock className="h-4 w-4 text-yellow-500" />;
+      return <TriangleAlert className="h-4 w-4 text-yellow-500" />;
   }
 };
 
@@ -69,7 +70,7 @@ export const getStatusColor = (status: string) => {
     case "Em andamento":
       return "text-blue-800 p-1.5";
     default:
-      return "text-orange-800 p-1.5";
+      return "text-yellow-800 p-1.5";
   }
 };
 
