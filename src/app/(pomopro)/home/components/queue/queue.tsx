@@ -6,39 +6,36 @@ import { History as HistoryIcon } from "lucide-react";
 import { Activity } from "@/domain/history/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  collection,
   query,
   orderBy,
   onSnapshot,
   doc,
   deleteDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "@/app/lib/firebase/config";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "@/hooks/use-toast";
-import { HistoryItem } from "./history-item";
+import { QueueItem } from "./queue-item";
 import { Loading } from "./loading";
 
 export interface ActivityWithId extends Activity {
   id: string;
 }
 
-export function History() {
+export function Queue() {
   const [activities, setActivities] = useState<ActivityWithId[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const auth = useAuth().user;
+  const { uuid, activitiesCollection } = useAuth();
 
   useEffect(() => {
-    if (!auth?.uid) return;
-
+    if (!uuid || !activitiesCollection) return;
     setIsLoading(true);
-    const activitiesCollection = collection(
-      db,
-      "users",
-      auth.uid,
-      "activities"
+    const q = query(
+      activitiesCollection,
+      orderBy("startDate", "desc"),
+      where("status", "in", ["Pendente", "Em andamento"])
     );
-    const q = query(activitiesCollection, orderBy("startDate", "desc"));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const fetchedActivities: ActivityWithId[] = [];
@@ -50,15 +47,14 @@ export function History() {
     });
 
     return () => unsubscribe();
-  }, [auth?.uid]);
+  }, [uuid, activitiesCollection]);
 
   const handleDelete = useCallback(
     async (activity: ActivityWithId) => {
-      if (!auth?.uid || !activity.id) return;
+      if (!uuid || !activity.id) return;
 
       if (activity.status === "Em andamento") {
         return toast({
-          className: "bg-background",
           itemID: "activity-delete-error",
           title: "Erro",
           description: "Não é possível excluir uma atividade em andamento.",
@@ -67,7 +63,7 @@ export function History() {
       }
 
       try {
-        await deleteDoc(doc(db, "users", auth.uid, "activities", activity.id));
+        await deleteDoc(doc(db, "users", uuid, "activities", activity.id));
         toast({
           itemID: "activity-delete-success",
           title: "Sucesso",
@@ -84,7 +80,7 @@ export function History() {
         console.error("Error deleting activity:", error);
       }
     },
-    [auth?.uid]
+    [uuid]
   );
 
   const memoizedActivities = useMemo(() => activities, [activities]);
@@ -112,7 +108,7 @@ export function History() {
           ) : (
             <ul className="space-y-4">
               {memoizedActivities.map((activity) => (
-                <HistoryItem
+                <QueueItem
                   key={activity.id}
                   activity={activity}
                   onDelete={handleDelete}

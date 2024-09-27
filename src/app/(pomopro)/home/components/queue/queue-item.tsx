@@ -1,8 +1,14 @@
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Trash2, Clock, Calendar, Tag } from "lucide-react"
-import { formatDate, getStatusColor, getStatusIcon, timeInMinutes } from "../helpers"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Trash2, Clock, Calendar, Tag } from "lucide-react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,23 +19,34 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { ActivityWithId } from "./history"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+} from "@/components/ui/alert-dialog";
+import { ActivityWithId } from "./queue";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { formatTime } from "@/utils/date-format";
+import { timeInMinutes, formatDate } from "@/utils/date-format";
+import { getStatusColor, getStatusIcon } from "@/utils/getValues";
 
 interface ActivityItemProps {
-  activity: ActivityWithId
-  onDelete: (activity: ActivityWithId) => void
+  activity: ActivityWithId;
+  onDelete: (activity: ActivityWithId) => void;
 }
 
-export function HistoryItem({ activity, onDelete }: ActivityItemProps) {
+export function QueueItem({ activity, onDelete }: ActivityItemProps) {
   return (
     <Card className="mb-4">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg">{activity.name}</CardTitle>
           <div className="flex items-center space-x-2">
-            <Badge variant="outline" className={getStatusColor(activity.status)}>
+            <Badge
+              variant="outline"
+              className={getStatusColor(activity.status)}
+            >
               {getStatusIcon(activity.status)}
               <span className="ml-1">{activity.status}</span>
             </Badge>
@@ -38,10 +55,12 @@ export function HistoryItem({ activity, onDelete }: ActivityItemProps) {
                 <Button
                   variant="outline"
                   size="icon"
-                  disabled={activity.status === "Em andamento"}
                   aria-label="Excluir atividade"
                 >
-                  <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
+                  <Trash2
+                    className="h-4 w-4 text-destructive"
+                    aria-hidden="true"
+                  />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -54,7 +73,7 @@ export function HistoryItem({ activity, onDelete }: ActivityItemProps) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction  onClick={() => onDelete(activity)} >
+                  <AlertDialogAction onClick={() => onDelete(activity)}>
                     Excluir
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -127,16 +146,21 @@ export function HistoryItem({ activity, onDelete }: ActivityItemProps) {
         <div className="w-full bg-secondary rounded-full h-2 dark:bg-secondary-foreground/25">
           <div
             className="bg-primary h-2 rounded-full dark:bg-primary-foreground"
-            style={{ width: `${(activity.timeWorked / activity.duration) * 100}%` }}
+            style={{
+              width: `${(activity.timeWorked / activity.duration) * 100}%`,
+            }}
           ></div>
         </div>
       </CardFooter>
       <CardFooter className="pt-2">
         <p className="text-sm text-muted-foreground">
-          Tempo trabalhado: {timeInMinutes(activity.timeWorked)} min
-          {activity.timeWorked > 0 && ` (${((activity.timeWorked / activity.duration) * 100).toFixed(0)}%)`}
+          Tempo trabalhado: {formatTime(activity.timeWorked)} min
+          {activity.timeWorked > 0 &&
+            ` (${((activity.timeWorked / activity.duration) * 100).toFixed(
+              0
+            )}%)`}
         </p>
       </CardFooter>
     </Card>
-  )
+  );
 }
