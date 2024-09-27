@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "../lib/firebase/admin";
 import { Header } from "./components/header/header";
+import { PomodoroProvider } from "@/context/pomodoro-context";
 
 export default async function LayoutPomoPro({
   children,
@@ -12,7 +13,9 @@ export default async function LayoutPomoPro({
   return (
     <div>
       <Header />
-      <main className="p-8">{children}</main>
+      <main className="p-8">
+        <PomodoroProvider>{children}</PomodoroProvider>
+      </main>
     </div>
   );
 }
