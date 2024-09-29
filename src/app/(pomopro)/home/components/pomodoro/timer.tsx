@@ -1,10 +1,9 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   Clock,
   Pause,
@@ -14,21 +13,21 @@ import {
   SkipForward,
   Volume2,
   VolumeX,
-} from "lucide-react"
-import { Activity } from "@/domain/history/types"
-import { formatTime } from "@/utils/date-format"
+} from "lucide-react";
+import { Activity } from "@/domain/history/types";
+import { formatTime } from "@/utils/date-format";
+import { usePomodoroContext } from "@/context/pomodoro-context";
 
 interface TimerProps {
-  currentActivity: Activity | null
-  timeLeft: number
-  isWorking: boolean
-  isRunning: boolean
-  onToggleTimer: () => void
-  onFinishActivity: () => void
-  onCancelActivity: () => void
-  onSkipBreak: () => void
+  currentActivity: Activity | null;
+  timeLeft: number;
+  isWorking: boolean;
+  isRunning: boolean;
+  onToggleTimer: () => void;
+  onFinishActivity: () => void;
+  onCancelActivity: () => void;
+  onSkipBreak: () => void;
 }
-
 export function Timer({
   currentActivity,
   timeLeft,
@@ -39,51 +38,7 @@ export function Timer({
   onCancelActivity,
   onSkipBreak,
 }: TimerProps) {
-  const [tickingEnabled, setTickingEnabled] = useState(true)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
-
-  const toggleTicking = () => {
-    setTickingEnabled((prev) => !prev)
-  }
-
-  useEffect(() => {
-    audioRef.current = new Audio("/clock.mp3")
-    audioRef.current.volume = 0.5
-    
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current = null
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    if (isRunning && tickingEnabled && audioRef.current) {
-      const playTick = () => {
-        if (audioRef.current) {
-          audioRef.current.currentTime = 0
-          audioRef.current.play()
-        }
-      }
-
-      intervalRef.current = setInterval(playTick, 1000)
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
-      if (audioRef.current) {
-        audioRef.current.pause()
-      }
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
-    }
-  }, [isRunning, tickingEnabled])
+  const { tickingEnabled, toggleTicking } = usePomodoroContext();
 
   return (
     <Card>
@@ -154,5 +109,5 @@ export function Timer({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
