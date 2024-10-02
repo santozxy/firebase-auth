@@ -1,12 +1,12 @@
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Trash2,
   Clock,
@@ -16,7 +16,7 @@ import {
   Play,
   Pause,
   TriangleAlert,
-} from "lucide-react"
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,51 +27,51 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { formatTime } from "@/utils/date-format"
-import { timeInMinutes, formatDate } from "@/utils/date-format"
-import { Activity } from "@/domain/history/types"
+} from "@/components/ui/tooltip";
+import { formatTime } from "@/utils/date-format";
+import { timeInMinutes, formatDate } from "@/utils/date-format";
+import { Activity } from "@/domain/history/types";
 
 export interface ActivityWithId extends Activity {
-  id: string
+  id: string;
 }
 
 interface ActivityItemProps {
-  activity: ActivityWithId
-  onDelete: (activity: ActivityWithId) => void
+  activity: ActivityWithId;
+  onDelete: () => void;
 }
 
 export const getStatusIcon = (status: string) => {
   switch (status) {
     case "Completa":
-      return <CheckCircle className="h-4 w-4 text-green-500" />
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
     case "Cancelada":
-      return <XCircle className="h-4 w-4 text-red-500" />
+      return <XCircle className="h-4 w-4 text-red-500" />;
     case "Em andamento":
-      return <Clock className="h-4 w-4 text-blue-500" />
+      return <Clock className="h-4 w-4 text-blue-500" />;
     default:
-      return <TriangleAlert className="h-4 w-4 text-yellow-500" />
+      return <TriangleAlert className="h-4 w-4 text-yellow-500" />;
   }
-}
+};
 
 export const getStatusColor = (status: string) => {
   switch (status) {
     case "Completa":
-      return "text-green-800 p-1.5"
+      return "text-green-800 p-1.5";
     case "Cancelada":
-      return "text-red-800 p-1.5"
+      return "text-red-800 p-1.5";
     case "Em andamento":
-      return "text-blue-800 p-1.5"
+      return "text-blue-800 p-1.5";
     default:
-      return "text-yellow-800 p-1.5"
+      return "text-yellow-800 p-1.5";
   }
-}
+};
 
 export function CardActivity({ activity, onDelete }: ActivityItemProps) {
   return (
@@ -111,7 +111,7 @@ export function CardActivity({ activity, onDelete }: ActivityItemProps) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => onDelete(activity)}>
+                  <AlertDialogAction onClick={() => onDelete()}>
                     Excluir
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -200,5 +200,5 @@ export function CardActivity({ activity, onDelete }: ActivityItemProps) {
         </p>
       </CardFooter>
     </Card>
-  )
+  );
 }

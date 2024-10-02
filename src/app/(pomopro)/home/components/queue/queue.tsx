@@ -1,23 +1,16 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LayoutList } from "lucide-react";
 import { Activity } from "@/domain/history/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  deleteDoc,
-  where,
-} from "firebase/firestore";
-import { db } from "@/app/lib/firebase/config";
+import { query, orderBy, onSnapshot, where } from "firebase/firestore";
 import { useAuth } from "@/hooks/use-auth";
-import { toast } from "@/hooks/use-toast";
 import { Loading } from "./loading";
 import { CardActivity } from "@/app/(pomopro)/components/card-activity/card-activity";
+import { revalidateRequest } from "@/app/actions/revalidate-tag";
+import { deleteAcitivity } from "@/domain/activities/activities";
 
 export interface ActivityWithId extends Activity {
   id: string;
@@ -49,30 +42,11 @@ export function Queue() {
     return () => unsubscribe();
   }, [uuid, activitiesCollection]);
 
-  const handleDelete = useCallback(
-    async (activityID: string) => {
-      if (!uuid) return;
-
-      try {
-        await deleteDoc(doc(db, "users", uuid, "activities", activityID));
-        toast({
-          itemID: "activity-delete-success",
-          title: "Sucesso",
-          description: "Atividade excluída com sucesso.",
-        });
-      } catch (error) {
-        toast({
-          itemID: "activity-delete-error",
-          title: "Erro",
-          description:
-            "Falha ao excluir atividade. Por favor, tente novamente.",
-          variant: "destructive",
-        });
-        console.error("Error deleting activity:", error);
-      }
-    },
-    [uuid]
-  );
+  const onDelete = async (activityID: string) => {
+    await revalidateRequest("getHistoryActivity");
+    if (!uuid) return;
+    await deleteAcitivity(uuid, activityID);
+  };
 
   const memoizedActivities = useMemo(() => activities, [activities]);
 
@@ -102,7 +76,7 @@ export function Queue() {
                 <CardActivity
                   key={activity.id}
                   activity={activity}
-                  onDelete={() => handleDelete(activity.id)}
+                  onDelete={() => onDelete(activity.id)}
                 />
               ))}
             </div>
