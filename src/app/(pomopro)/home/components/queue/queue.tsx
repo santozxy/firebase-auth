@@ -50,20 +50,11 @@ export function Queue() {
   }, [uuid, activitiesCollection]);
 
   const handleDelete = useCallback(
-    async (activity: ActivityWithId) => {
-      if (!uuid || !activity.id) return;
-
-      if (activity.status === "Em andamento") {
-        return toast({
-          itemID: "activity-delete-error",
-          title: "Erro",
-          description: "Não é possível excluir uma atividade em andamento.",
-          variant: "destructive",
-        });
-      }
+    async (activityID: string) => {
+      if (!uuid) return;
 
       try {
-        await deleteDoc(doc(db, "users", uuid, "activities", activity.id));
+        await deleteDoc(doc(db, "users", uuid, "activities", activityID));
         toast({
           itemID: "activity-delete-success",
           title: "Sucesso",
@@ -111,7 +102,7 @@ export function Queue() {
                 <CardActivity
                   key={activity.id}
                   activity={activity}
-                  onDelete={handleDelete}
+                  onDelete={() => handleDelete(activity.id)}
                 />
               ))}
             </div>
