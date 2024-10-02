@@ -20,7 +20,7 @@ interface ActivityFormProps {
 
 export function ActivityForm({ onAddActivity }: ActivityFormProps) {
   const [newActivityName, setNewActivityName] = useState("");
-  const [newActivityDuration, setNewActivityDuration] = useState("");
+  const [newActivityDuration, setNewActivityDuration] = useState("25");
   const [newActivityClassification, setNewActivityClassification] =
     useState<Activity["classification"]>("Estudos");
 
