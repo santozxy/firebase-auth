@@ -24,7 +24,7 @@ export async function signInWithGoogle() {
       return true;
     } else return false;
   } catch (error) {
-    console.error("Error signing in with Google", error);
+    console.error("Erro ao tentar logar com google", error);
     return false;
   }
 }
@@ -46,26 +46,25 @@ export async function signInEmailAndPassword(email: string, password: string) {
       return true;
     } else return false;
   } catch (error) {
-    console.error("Error signing in with email and password", error);
+    console.error("Erro ao tentar logar com email e senha", error);
     return false;
   }
 }
 
 export async function signOut() {
   try {
-    await auth.signOut();
-
     const response = await fetch("/api/auth/sign-out", {
       headers: {
         "Content-Type": "application/json",
       },
     });
+    await auth.signOut();
     const resBody = (await response.json()) as unknown as APIResponse<string>;
     if (response.ok && resBody.success) {
       return true;
     } else return false;
   } catch (error) {
-    console.error("Error signing out with Google", error);
+    console.error("Erro ao tentar deslogar", error);
     return false;
   }
 }
