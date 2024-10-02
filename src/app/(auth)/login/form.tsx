@@ -11,7 +11,6 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import { LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -29,7 +28,6 @@ import logoLight from "../../../../public/logo-light.png";
 export function FormLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -139,19 +137,7 @@ export function FormLogin() {
                 required
               />
             </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="remember"
-                checked={rememberMe}
-                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-              />
-              <Label
-                htmlFor="remember"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Lembrar-me
-              </Label>
-            </div>
+           
             <Button type="submit" className="w-full" disabled={loading}>
               <LogIn className="mr-2 h-4 w-4" aria-hidden="true" />
               {loading ? "Entrando..." : "Entrar"}
