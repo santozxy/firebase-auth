@@ -22,6 +22,7 @@ import {
 import { showNotificationOrToast } from "@/utils/pomodoro";
 import { useCollection } from "@/hooks/use-collections";
 import { formatTime } from "@/utils/date-format";
+import { revalidateRequest } from "@/app/actions/revalidate-tag";
 
 interface PomodoroContextType {
   currentActivity: Activity | null;
@@ -128,6 +129,7 @@ export const PomodoroProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         const docRef = await addDoc(activitiesCollection, newActivity);
         newActivity.id = docRef.id;
+        await revalidateRequest("getHistoryActivity");
       } catch (error) {
         console.error("Error adding new activity to Firestore:", error);
       }
@@ -210,6 +212,7 @@ export const PomodoroProvider: React.FC<{ children: React.ReactNode }> = ({
         );
         try {
           await updateDoc(activityRef, updatedActivity);
+          await revalidateRequest("getHistoryActivity");
         } catch (error) {
           console.error(
             "Error updating completed activity in Firestore:",
@@ -250,6 +253,7 @@ export const PomodoroProvider: React.FC<{ children: React.ReactNode }> = ({
         );
         try {
           await updateDoc(activityRef, updatedActivity);
+          await revalidateRequest("getHistoryActivity");
         } catch (error) {
           console.error(
             "Error updating cancelled activity in Firestore:",
@@ -334,6 +338,7 @@ export const PomodoroProvider: React.FC<{ children: React.ReactNode }> = ({
         await deleteDoc(
           doc(activitiesCollection, inProgressActivity.id as string)
         );
+        await revalidateRequest("getHistoryActivity");
         const updatedActivities = activities.filter(
           (a) => a.id !== inProgressActivity.id
         );
