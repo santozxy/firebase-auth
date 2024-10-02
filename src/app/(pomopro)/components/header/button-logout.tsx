@@ -20,6 +20,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useCollection } from "@/hooks/use-collections";
 import { CollectionReference } from "firebase/firestore";
+import { toast } from "@/hooks/use-toast";
 
 export const ButtonLogout = React.forwardRef<HTMLButtonElement>(
   function ButtonLogout(_, ref) {
@@ -33,8 +34,16 @@ export const ButtonLogout = React.forwardRef<HTMLButtonElement>(
           activitiesCollection as CollectionReference
         );
       }
-      const isOk = await signOut();
-      if (isOk) router.push("/login");
+      try {
+        await signOut();
+        toast({
+          title: "Sucesso",
+          description: "Você saiu da sua conta com sucesso.",
+        });
+        router.push("/login");
+      } catch (error) {
+        console.error(error);
+      }
     };
 
     return (
