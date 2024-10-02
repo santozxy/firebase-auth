@@ -9,7 +9,7 @@ export default async function LayoutPomoPro({
   return (
     <div>
       <Header />
-      <main className="p-8">
+      <main className="p-10 max-sm:p-6">
         <PomodoroProvider>{children}</PomodoroProvider>
       </main>
     </div>

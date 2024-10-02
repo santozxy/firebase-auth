@@ -82,7 +82,7 @@ export function Timer({
           <Badge variant={isWorking ? "default" : "secondary"} className="mb-4">
             {isWorking && currentActivity ? "Trabalhando" : "Descansando"}
           </Badge>
-          <div className="space-x-2">
+          <div className="flex  gap-2 flex-wrap items-center justify-center">
             <Button onClick={onToggleTimer} disabled={!timeLeft}>
               {isRunning ? (
                 <Pause className="mr-2 h-4 w-4" />
