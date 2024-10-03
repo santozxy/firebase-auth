@@ -50,6 +50,7 @@ interface PomodoroContextType {
   setShowDialog: (show: boolean) => void;
   setTickingEnabled: (enabled: boolean) => void;
   toggleTicking: () => void;
+  removeActivity: (activityId: string) => Promise<void>;
 }
 
 const PomodoroContext = createContext<PomodoroContextType | undefined>(
@@ -80,7 +81,6 @@ export const PomodoroProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     audioRef.current = new Audio("/clock.mp3");
     audioRef.current.volume = 0.5;
-
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -185,6 +185,38 @@ export const PomodoroProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsRunning(true);
     setTimerActive(true);
   }, [breakTime]);
+
+  const removeActivity = useCallback(
+    async (activityId: string) => {
+      if (activitiesCollection) {
+        try {
+          await deleteDoc(doc(activitiesCollection, activityId));
+          const updatedActivities = activities.filter(
+            (a) => a.id !== activityId
+          );
+          updateActivities(updatedActivities);
+
+          if (currentActivity && currentActivity.id === activityId) {
+            setCurrentActivity(null);
+            setIsRunning(false);
+            setTimerActive(false);
+            moveToNextActivity();
+          }
+
+          await revalidateRequest("getHistoryActivity");
+        } catch (error) {
+          console.error("Error removing activity:", error);
+        }
+      }
+    },
+    [
+      activities,
+      activitiesCollection,
+      currentActivity,
+      moveToNextActivity,
+      updateActivities,
+    ]
+  );
 
   const finishCurrentActivity = useCallback(async () => {
     if (currentActivity) {
@@ -443,6 +475,7 @@ export const PomodoroProvider: React.FC<{ children: React.ReactNode }> = ({
         setShowDialog,
         setTickingEnabled,
         toggleTicking,
+        removeActivity,
       }}
     >
       {children}

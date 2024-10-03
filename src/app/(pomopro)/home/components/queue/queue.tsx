@@ -11,6 +11,7 @@ import { Loading } from "./loading";
 import { CardActivity } from "@/app/(pomopro)/components/card-activity/card-activity";
 import { revalidateRequest } from "@/app/actions/revalidate-tag";
 import { deleteAcitivity } from "@/domain/activities/activities";
+import { usePomodoroContext } from "@/context/pomodoro-context";
 
 export interface ActivityWithId extends Activity {
   id: string;
@@ -20,7 +21,7 @@ export function Queue() {
   const [activities, setActivities] = useState<ActivityWithId[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { uuid, activitiesCollection } = useAuth();
-
+  const { removeActivity } = usePomodoroContext(); // Adicione esta linha
   useEffect(() => {
     if (!uuid || !activitiesCollection) return;
     setIsLoading(true);
@@ -46,6 +47,7 @@ export function Queue() {
     await revalidateRequest("getHistoryActivity");
     if (!uuid) return;
     await deleteAcitivity(uuid, activityID);
+    removeActivity(activityID); // Adicione esta linha
   };
 
   const memoizedActivities = useMemo(() => activities, [activities]);

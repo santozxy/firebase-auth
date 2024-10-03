@@ -19,6 +19,7 @@ import { CardActivity } from "@/app/(pomopro)/components/card-activity/card-acti
 import { deleteAcitivity } from "@/domain/activities/activities";
 import { revalidateRequest } from "@/app/actions/revalidate-tag";
 import { useAuth } from "@/hooks/use-auth";
+import { usePomodoroContext } from "@/context/pomodoro-context";
 
 export interface ActivityWithId extends Activity {
   id: string;
@@ -30,6 +31,7 @@ interface ActivityHistoryProps {
 
 export function ActivityHistory({ activities }: ActivityHistoryProps) {
   const { uuid } = useAuth();
+  const { removeActivity } = usePomodoroContext();
   const [filteredActivities, setFilteredActivities] =
     useState<ActivityWithId[]>(activities);
   // Filter states
@@ -41,6 +43,7 @@ export function ActivityHistory({ activities }: ActivityHistoryProps) {
     await revalidateRequest("getHistoryActivity");
     if (!uuid) return;
     await deleteAcitivity(uuid, activityID);
+    removeActivity(activityID);
   };
 
   const applyFilters = useCallback(() => {
